@@ -1,11 +1,75 @@
-[gd_scene load_steps=2 format=3 uid="uid://h7smmv4p56t0"]
+[gd_scene load_steps=13 format=3 uid="uid://h7smmv4p56t0"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mwb40"]
-albedo_color = Color(0.24477652, 0.24477637, 0.24477637, 1)
+[ext_resource type="PackedScene" uid="uid://du4mlr4w3dki2" path="res://player.tscn" id="1_7jktm"]
+[ext_resource type="Texture2D" uid="uid://c8arnlq67qi7" path="res://Assets/textures/grids/Dark/texture_05.png" id="1_80nbo"]
+[ext_resource type="Texture2D" uid="uid://cm5m7nr7dugjd" path="res://Assets/textures/grids/Purple/texture_09.png" id="1_fc0e3"]
+[ext_resource type="Texture2D" uid="uid://hu5rfl6qr2nv" path="res://Assets/textures/grids/Red/texture_09.png" id="2_7jktm"]
+[ext_resource type="Texture2D" uid="uid://b58xv1joypxo5" path="res://Assets/textures/grids/Orange/texture_09.png" id="2_e2o6t"]
 
-[node name="Game" type="Node3D"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ryrav"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
 
-[node name="CSGBox3D" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
-size = Vector3(512, 2, 512)
-material = SubResource("StandardMaterial3D_mwb40")
+[sub_resource type="Sky" id="Sky_eow3j"]
+sky_material = SubResource("ProceduralSkyMaterial_ryrav")
+
+[sub_resource type="Environment" id="Environment_j5wjh"]
+background_mode = 2
+sky = SubResource("Sky_eow3j")
+tonemap_mode = 2
+glow_enabled = true
+fog_enabled = true
+fog_density = 0.001
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vef74"]
+albedo_texture = ExtResource("1_fc0e3")
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hve3p"]
+albedo_texture = ExtResource("2_7jktm")
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_feb5d"]
+albedo_texture = ExtResource("2_e2o6t")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_e2o6t"]
+albedo_texture = ExtResource("1_80nbo")
+uv1_triplanar = true
+
+[node name="Game" type="Node"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.8660254, -0.43301278, 0.25, 0, 0.49999997, 0.86602545, -0.50000006, 0.75, -0.43301266, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_j5wjh")
+
+[node name="Workspace" type="Node3D" parent="."]
+
+[node name="Player" parent="Workspace" instance=ExtResource("1_7jktm")]
+
+[node name="Boxes" type="Node" parent="Workspace"]
+
+[node name="OrangeBox" type="CSGBox3D" parent="Workspace/Boxes"]
+transform = Transform3D(-0.79318327, 0, 0.6089829, 0, 1, 0, -0.6089829, 0, -0.79318327, 2.5471601, 1, 4.68488)
+material_override = SubResource("StandardMaterial3D_vef74")
+use_collision = true
+size = Vector3(2, 2, 2)
+
+[node name="OrangeBox2" type="CSGBox3D" parent="Workspace/Boxes"]
+transform = Transform3D(-0.86766124, 0, -0.49715567, 0, 1, 0, 0.49715567, 0, -0.86766124, -5.2032633, 1.5, 2.2503424)
+material_override = SubResource("StandardMaterial3D_hve3p")
+use_collision = true
+size = Vector3(3, 3, 3)
+
+[node name="PurpleBox" type="CSGBox3D" parent="Workspace/Boxes"]
+transform = Transform3D(0.72548246, 0, -0.68824065, 0, 1, 0, 0.68824065, 0, 0.72548246, 1.4987581, 0.5, -2.5654912)
+material_override = SubResource("StandardMaterial3D_feb5d")
+use_collision = true
+
+[node name="Baseplate" type="CSGBox3D" parent="Workspace"]
+transform = Transform3D(0.9999993, -0.000673906, 0.001013503, 0.0006732274, 0.9999995, 0.0006845948, -0.0010139539, -0.0006839268, 0.9999993, -0.017201424, -1.014622, -0.0045723915)
+material_override = SubResource("StandardMaterial3D_e2o6t")
+use_collision = true
+size = Vector3(1024, 2, 1024)

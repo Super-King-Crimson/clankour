@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cb64spf0bllsp"]
+
+[ext_resource type="Script" uid="uid://dpk1yvpx5csvx" path="res://CameraMount.cs" id="1_3imyi"]
+
+[node name="CameraMount" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 0.97743064, 0.21125656, 0, -0.21125656, 0.97743064, 0, 0, 0)
+script = ExtResource("1_3imyi")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48033488, 0.53493756, 1.5233402)
