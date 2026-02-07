@@ -8,19 +8,18 @@ public partial class StateMachine : Node
     private IMover _mover;
     private MovementState3D _currentState;
 
-    public void Init(CharacterBody3D character, AnimationPlayer animator)
+    public void Init(CharacterBody3D agent, AnimationPlayer animator)
     {
-
         foreach (var child in GetChildren())
         {
-            GD.Print($"{child.Name}");
             if (child is MovementState3D state)
             {
-                state.Init(character, animator, _mover);
-                GD.Print($"Initialized {state.Name}");
+                state.Init(agent, animator, _mover);
             }
-
         }
+
+        _currentState = startingState;
+        startingState.Enter();
     }
 
     public void ChangeState(MovementState3D newState)
@@ -32,7 +31,7 @@ public partial class StateMachine : Node
         _currentState.Enter();
     }
 
-    public void ProcessFrame(float delta)
+    public void ProcessFrame(double delta)
     {
         MovementState3D newState = _currentState.ProcessFrame(delta);
 
@@ -48,7 +47,7 @@ public partial class StateMachine : Node
             this.ChangeState(newState);
     }
 
-    public void ProcessPhysics(float delta)
+    public void ProcessPhysics(double delta)
     {
         MovementState3D newState = _currentState.ProcessPhysics(delta);
 

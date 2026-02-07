@@ -11,7 +11,7 @@ public partial class CameraMount : Node3D
     [Export] public bool camInvertH = true;
     [Export] public bool camInvertV = true;
 
-    [Export] public Node3D? character;
+    [Export] public CharacterBody3D? agent;
 
     public override void _Input(InputEvent e)
     {
@@ -20,7 +20,7 @@ public partial class CameraMount : Node3D
             int invH = camInvertH ? -1 : 1;
             int invV = camInvertV ? -1 : 1;
 
-            character?.RotateY(invH * camSensH * Mathf.DegToRad(motionEvent.Relative.X));
+            agent?.RotateY(invH * camSensH * Mathf.DegToRad(motionEvent.Relative.X));
             this.RotateX(invV * camSensV * Mathf.DegToRad(motionEvent.Relative.Y));
 
             this.RotationDegrees = new Vector3(

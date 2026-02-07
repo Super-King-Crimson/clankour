@@ -5,7 +5,7 @@ public partial class Airborne : MovementState3D
 {
     [Export] public MovementState3D walkState;
 
-    public override MovementState3D ProcessPhysics(float delta)
+    public override MovementState3D ProcessPhysics(double delta)
     {
         if (_agent.IsOnFloor())
         {

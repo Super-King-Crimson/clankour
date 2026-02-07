@@ -10,7 +10,9 @@ public partial class Walking : MovementState3D
     [Export] public float baseSpeed = 5f;
     [Export] public float currentSpeed = 0f;
 
-    public override MovementState3D ProcessPhysics(float delta)
+    [Export] public Node3D character;
+
+    public override MovementState3D ProcessPhysics(double delta)
     {
         if (!_agent.IsOnFloor())
             return airborneState;
@@ -24,8 +26,9 @@ public partial class Walking : MovementState3D
 
         Vector3 direction = _agent.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
 
+        if (character is not null)
+            character.LookAt(_agent.Position + direction);
 
-        _agent.LookAt(_agent.Position + direction);
         _agent.Velocity = direction * baseSpeed;
 
         return base.ProcessPhysics(delta);

@@ -26,10 +26,10 @@ public abstract partial class MovementState3D : State
             _animator.Stop();
     }
 
-    public virtual MovementState3D ProcessFrame(float delta) => null;
+    public virtual MovementState3D ProcessFrame(double delta) => null;
     public virtual MovementState3D ProcessInput(InputEvent e) => null;
 
-    public virtual MovementState3D ProcessPhysics(float delta)
+    public virtual MovementState3D ProcessPhysics(double delta)
     {
         _agent.MoveAndSlide();
         return null;
