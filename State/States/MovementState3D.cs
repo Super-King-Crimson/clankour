@@ -15,16 +15,12 @@ public abstract partial class MovementState3D : State
         _mover = mover;
     }
 
-    public override void Enter()
+    public override void Enter(State _)
     {
         _animator.Play(this.animationName);
     }
 
-    public override void Exit()
-    {
-        if (_animator.CurrentAnimation == this.animationName)
-            _animator.Stop();
-    }
+    public override void Exit(State _) { }
 
     public virtual MovementState3D ProcessFrame(double delta) => null;
     public virtual MovementState3D ProcessInput(InputEvent e) => null;

@@ -26,6 +26,7 @@ public partial class Walking : MovementState3D
 
         Vector3 direction = _agent.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
 
+        // optionally model face towards direction player is moving
         if (character is not null)
             character.LookAt(_agent.Position + direction);
 

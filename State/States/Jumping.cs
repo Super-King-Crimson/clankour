@@ -7,6 +7,8 @@ public partial class Jumping : MovementState3D
 
     [Export] public float jumpVelocity = 4.5f;
 
+    public override void Exit(State _) { }
+
     public override MovementState3D ProcessPhysics(double delta)
     {
         var newVel = _agent.Velocity;

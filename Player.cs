@@ -33,7 +33,7 @@ public partial class Player : CharacterBody3D
     public override void _Ready()
     {
         _animator = GetNode<AnimationPlayer>("Character/Model/Animator");
-        _cameraMount = GetNode<CameraMount>("Character/CameraMount");
+        _cameraMount = GetNode<CameraMount>("CameraMount");
         _stateMachine = GetNode<StateMachine>("StateMachine");
         _mover = GetNode<PlayerMover>("StateMachine/Mover");
 

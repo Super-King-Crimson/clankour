@@ -19,16 +19,16 @@ public partial class StateMachine : Node
         }
 
         _currentState = startingState;
-        startingState.Enter();
+        startingState.Enter(null);
     }
 
     public void ChangeState(MovementState3D newState)
     {
         if (_currentState is not null)
-            _currentState.Exit();
+            _currentState.Exit(newState);
 
+        newState.Enter(_currentState);
         _currentState = newState;
-        _currentState.Enter();
     }
 
     public void ProcessFrame(double delta)
