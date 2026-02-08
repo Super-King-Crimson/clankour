@@ -12,9 +12,9 @@ public abstract partial class GroundedMovementState3D : MovementState3D
     [Export] public virtual float RotationSpeed { get; set; } = 0.1f;
     [Export] public virtual float MaxSpeed { get; set; } = 100.0f;
     [Export] public virtual float MaxCoyoteTimeMs { get; set; } = 150.0f;
+    [Export] protected virtual Node3D Character { get; set; }
 
     protected float _coyoteTimerMs = 0.0f;
-    protected Node3D _character;
     protected float _runSpeed = 5.0f;
 
     protected MovementState3D GetAerialState(double delta)

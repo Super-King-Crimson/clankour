@@ -5,6 +5,16 @@ public partial class Walking : GroundedMovementState3D
 {
     [Export] public Running runState;
 
+    public override MovementState3D Enter(State _)
+    {
+        CurrentSpeed = _agent.Velocity.Length();
+
+        if (CurrentSpeed > _runSpeed)
+            return runState;
+
+        return base.Enter(_);
+    }
+
     public override MovementState3D ProcessPhysics(double delta)
     {
         base.ProcessPhysics(delta);
@@ -27,8 +37,8 @@ public partial class Walking : GroundedMovementState3D
         var goalVel = direction * CurrentSpeed;
         _agent.Velocity = prevVel.Slerp(goalVel, RotationSpeed);
 
-        if (_character is not null)
-            _character.LookAt(_agent.Position + _agent.Velocity);
+        if (Character is not null)
+            Character.LookAt(_agent.Position + _agent.Velocity);
 
         if (_agent.Velocity.Length() > _runSpeed)
             return runState;

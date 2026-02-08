@@ -3,25 +3,28 @@ using System;
 
 public partial class Airborne : MovementState3D
 {
-    [Export] public MovementState3D walkState;
+    [Export] public GroundedMovementState3D walkState;
+    [Export] public MovementState3D idleState;
 
     private void BaseEnterMethod(StringName _) => base.Enter(null);
     private bool _connected = false;
 
-    public override void Enter(State prevState)
+    public override MovementState3D Enter(State prevState)
     {
         if (prevState is Jumping)
         {
             _connected = true;
             _animator.AnimationFinished += BaseEnterMethod;
+
+            return null;
         }
         else
         {
-            base.Enter(prevState);
+            return base.Enter(prevState);
         }
     }
 
-    public override void Exit(State _)
+    public override MovementState3D Exit(State _)
     {
         if (_connected)
         {
@@ -29,21 +32,19 @@ public partial class Airborne : MovementState3D
             _animator.AnimationFinished -= BaseEnterMethod;
         }
 
-        base.Exit(_);
+        return base.Exit(_);
     }
 
     public override MovementState3D ProcessPhysics(double delta)
     {
+        base.ProcessPhysics(delta);
+        _agent.Velocity += _agent.GetGravity() * (float)delta;
+
         if (_agent.IsOnFloor())
         {
-            var newVel = _agent.Velocity;
-            newVel.Y = 0;
-            _agent.Velocity = newVel;
-
-            return walkState;
+            return this.GetInputDirection() == Vector2.Zero ? idleState : walkState;
         }
 
-        _agent.Velocity += _agent.GetGravity() * (float)delta;
-        return base.ProcessPhysics(delta);
+        return null;
     }
 }

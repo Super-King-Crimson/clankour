@@ -6,8 +6,18 @@ public partial class Running : GroundedMovementState3D
     [Export] public Walking walkState;
 
     [Export] public override float Acceleration { get; set; } = 30.0f;
-    [Export] public float friction = 10.0f;
     [Export] public float minimumSlideDotProd = -0.2f;
+    [Export] public float friction = 10.0f;
+
+    public override MovementState3D Enter(State _)
+    {
+        CurrentSpeed = _agent.Velocity.Length();
+
+        if (CurrentSpeed < _runSpeed)
+            return walkState;
+
+        return base.Enter(_);
+    }
 
     public override MovementState3D ProcessPhysics(double delta)
     {
@@ -44,8 +54,8 @@ public partial class Running : GroundedMovementState3D
         var goalVel = direction * CurrentSpeed;
         _agent.Velocity = prevVel.Slerp(goalVel, RotationSpeed);
 
-        if (_character is not null)
-            _character.LookAt(_agent.Position + _agent.Velocity);
+        if (Character is not null)
+            Character.LookAt(_agent.Position + _agent.Velocity);
 
         return null;
     }

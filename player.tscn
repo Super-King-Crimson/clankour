@@ -3959,12 +3959,12 @@ walkState = NodePath("../Walking")
 jumpState = NodePath("../Jumping")
 animationName = "idle"
 
-[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("idleState", "airborneState", "jumpState", "character")]
+[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("idleState", "airborneState", "jumpState", "Character")]
 script = ExtResource("4_2hs0m")
 idleState = NodePath("../Idle")
 airborneState = NodePath("../Airborne")
 jumpState = NodePath("../Jumping")
-character = NodePath("../../Character")
+Character = NodePath("../../Character")
 animationName = "walking"
 
 [node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState")]
@@ -3972,5 +3972,10 @@ script = ExtResource("5_sweqy")
 walkState = NodePath("../Walking")
 animationName = "idle"
 
-[node name="Running" type="Node" parent="StateMachine"]
+[node name="Running" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "airborneState", "jumpState", "Character")]
 script = ExtResource("9_b26j0")
+walkState = NodePath("../Walking")
+idleState = NodePath("../Idle")
+airborneState = NodePath("../Airborne")
+jumpState = NodePath("../Jumping")
+Character = NodePath("../../Character")

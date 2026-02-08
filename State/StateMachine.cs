@@ -27,7 +27,10 @@ public partial class StateMachine : Node
         if (_currentState is not null)
             _currentState.Exit(newState);
 
-        newState.Enter(_currentState);
+        MovementState3D temp = newState;
+        while (temp != null)
+            temp = temp.Enter(_currentState);
+
         _currentState = newState;
     }
 
