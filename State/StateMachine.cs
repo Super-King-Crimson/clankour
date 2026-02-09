@@ -29,7 +29,10 @@ public partial class StateMachine : Node
 
         MovementState3D temp = newState;
         while (temp != null)
+        {
+            GD.Print($"New state: {temp.Name}");
             temp = temp.Enter(_currentState);
+        }
 
         _currentState = newState;
     }

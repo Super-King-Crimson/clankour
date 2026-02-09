@@ -1,18 +1,18 @@
 using Godot;
 using System;
 
-public partial class Idle : MovementState3D
+public partial class Idle : GroundedState3D
 {
-    [Export] public MovementState3D walkState;
-    [Export] public MovementState3D jumpState;
+    [Export] public Walking walkState;
 
     public override MovementState3D ProcessPhysics(double delta)
     {
-        if (this.GetInputDirection() != Vector2.Zero)
-            return walkState;
+        if (this.GetAerialState(delta) is MovementState3D aerialState)
+            return aerialState;
 
-        if (this.WantsJump())
-            return jumpState;
+        Vector2 inputDir = this.GetInputDirection();
+        if (inputDir != Vector2.Zero)
+            return this.walkState;
 
         _agent.Velocity = Vector3.Zero;
 

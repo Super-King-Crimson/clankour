@@ -1,18 +1,29 @@
 using Godot;
 using System;
 
-public partial class Walking : GroundedMovementState3D
+public partial class Walking : GroundedState3D
 {
-    [Export] public Running runState;
+    [Export] public GroundedState3D runState;
+    [Export] public GroundedState3D idleState;
+
+    [Export] public float animSpeedBase = 0.5f;
+    [Export] public float animSpeedScale = 1.0f;
 
     public override MovementState3D Enter(State _)
     {
-        CurrentSpeed = _agent.Velocity.Length();
+        var speed = _agent.Velocity.Length();
 
-        if (CurrentSpeed > _runSpeed)
+        if (speed > _runSpeed)
             return runState;
 
         return base.Enter(_);
+    }
+
+    public override MovementState3D Exit(State _)
+    {
+        _animator.SpeedScale = 1;
+
+        return base.Exit(_);
     }
 
     public override MovementState3D ProcessPhysics(double delta)
@@ -25,17 +36,21 @@ public partial class Walking : GroundedMovementState3D
         Vector2 inputDir = this.GetInputDirection();
         if (inputDir == Vector2.Zero)
         {
-            this.CurrentSpeed = 0;
             _agent.Velocity = Vector3.Zero;
             return idleState;
         }
 
         Vector3 direction = _agent.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
         var prevVel = _agent.Velocity;
+        var speed = prevVel.Length();
         var deltaV = Acceleration * (float)delta;
-        CurrentSpeed = Math.Min(MaxSpeed, CurrentSpeed + deltaV);
-        var goalVel = direction * CurrentSpeed;
-        _agent.Velocity = prevVel.Slerp(goalVel, RotationSpeed);
+
+        var newSpeed = Math.Min(speed + deltaV, MaxSpeed);
+        var newVel = prevVel.Normalized() * newSpeed;
+        var goalVel = direction * newSpeed;
+        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed);
+
+        _animator.SpeedScale = this.animSpeedBase + (this.animSpeedScale * newSpeed / _runSpeed);
 
         if (Character is not null)
             Character.LookAt(_agent.Position + _agent.Velocity);

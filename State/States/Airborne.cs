@@ -3,7 +3,7 @@ using System;
 
 public partial class Airborne : MovementState3D
 {
-    [Export] public GroundedMovementState3D walkState;
+    [Export] public GroundedState3D walkState;
     [Export] public MovementState3D idleState;
 
     private void BaseEnterMethod(StringName _) => base.Enter(null);
