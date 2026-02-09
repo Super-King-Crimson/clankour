@@ -3,6 +3,8 @@ using System;
 
 public partial class Walking : GroundedState3D
 {
+    public override float RotationSpeed { get; set; } = 10.0f;
+
     public override float AnimSpeedBase { get; set; } = 0.5f;
     public override float AnimSpeedScale { get; set; } = 0.5f;
 
@@ -38,14 +40,16 @@ public partial class Walking : GroundedState3D
             return idleState;
         }
 
+        float fdelta = (float)delta;
+
         var prevVel = _agent.Velocity;
         var speed = prevVel.Length();
-        var deltaV = Acceleration * (float)delta;
+        var deltaV = Acceleration * fdelta;
 
         var newSpeed = Math.Min(speed + deltaV, MaxSpeed);
         var newVel = prevVel.Normalized() * newSpeed;
         var goalVel = direction * newSpeed;
-        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed);
+        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed * fdelta);
 
         if (Character is not null)
             Character.LookAt(_agent.Position + _agent.Velocity);

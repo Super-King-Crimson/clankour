@@ -3,6 +3,8 @@ using System;
 
 public abstract partial class MovementState3D : State
 {
+    [Export] protected virtual Node3D Character { get; set; }
+
     protected CharacterBody3D _agent;
     protected AnimationPlayer _animator;
     protected IMover _mover;
@@ -15,19 +17,19 @@ public abstract partial class MovementState3D : State
         _mover = mover;
     }
 
-    public override MovementState3D Enter(State _)
+    public override State Enter(State _)
     {
         _animator.Play(this.animationName);
 
         return null;
     }
 
-    public override MovementState3D Exit(State _) => null;
+    public override State Exit(State _) => null;
 
-    public virtual MovementState3D ProcessFrame(double delta) => null;
-    public virtual MovementState3D ProcessInput(InputEvent e) => null;
+    public override State ProcessFrame(double delta) => null;
+    public override State ProcessInput(InputEvent e) => null;
 
-    public virtual MovementState3D ProcessPhysics(double delta)
+    public override State ProcessPhysics(double delta)
     {
         _agent.MoveAndSlide();
         return null;

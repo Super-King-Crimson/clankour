@@ -16,7 +16,7 @@ public partial class Idle : GroundedState3D
         return null;
     }
 
-    public override MovementState3D ProcessPhysics(double delta)
+    public override State ProcessPhysics(double delta)
     {
         if (this.GetAerialState() is MovementState3D aerialState)
             return aerialState;
@@ -28,6 +28,8 @@ public partial class Idle : GroundedState3D
             return this.walkState;
 
         _agent.Velocity = Vector3.Zero;
+        if (_agent.Velocity != Vector3.Zero && Character is not null)
+            Character.LookAt(_agent.Velocity);
 
         return base.ProcessPhysics(delta);
     }

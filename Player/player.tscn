@@ -9,7 +9,7 @@
 [ext_resource type="Script" uid="uid://c6laimkagg7ni" path="res://State/States/Walking.cs" id="4_2hs0m"]
 [ext_resource type="Script" uid="uid://by4lintkeccdw" path="res://State/States/Airborne.cs" id="5_sweqy"]
 [ext_resource type="Script" uid="uid://c4ihk10pae0lm" path="res://State/States/Running.cs" id="9_b26j0"]
-[ext_resource type="Script" uid="uid://dk3tapunjr6vk" path="res://Player/Sliding.cs" id="10_x3vf3"]
+[ext_resource type="Script" uid="uid://dk3tapunjr6vk" path="res://State/States/Sliding.cs" id="10_x3vf3"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_00tjw"]
 radius = 0.25976563
@@ -3977,11 +3977,12 @@ Acceleration = 5.0
 Character = NodePath("../../Character")
 animationName = "walking"
 
-[node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "jumpState")]
+[node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "jumpState", "Character")]
 script = ExtResource("5_sweqy")
 walkState = NodePath("../Walking")
 idleState = NodePath("../Idle")
 jumpState = NodePath("../Jumping")
+Character = NodePath("../../Character")
 animationName = "idle"
 
 [node name="Running" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "slidingState", "airborneState", "jumpState", "Character")]

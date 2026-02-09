@@ -59,13 +59,14 @@ public partial class Running : GroundedState3D
             return idleState;
         }
 
-        deltaV = Acceleration * (float)delta;
+        float fdelta = (float)delta;
+        deltaV = Acceleration * fdelta;
         newSpeed = Math.Min(MaxSpeed, speed + deltaV);
 
         newSpeed = Math.Min(speed + deltaV, MaxSpeed);
         var newVel = prevVel.Normalized() * newSpeed;
         var goalVel = direction * newSpeed;
-        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed);
+        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed * fdelta);
 
         _animator.SpeedScale = this.GetAnimationSpeed(newSpeed);
 

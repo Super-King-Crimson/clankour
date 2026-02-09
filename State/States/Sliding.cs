@@ -8,7 +8,6 @@ public partial class Sliding : GroundedState3D
     [Export] public GroundedState3D idleState;
 
     public override float Friction { get; set; } = 40.0f;
-    public float cartwheelBoost = 3.0f;
 
     protected override MovementState3D GetGroundedState()
     {
@@ -36,9 +35,7 @@ public partial class Sliding : GroundedState3D
             if (aerialState is Jumping)
             {
                 Vector3 direction = this.GetInputDirection();
-
                 Vector3 newVelocity = direction * _agent.Velocity.Length();
-                newVelocity.Y += this.cartwheelBoost;
 
                 _agent.Velocity = newVelocity;
             }

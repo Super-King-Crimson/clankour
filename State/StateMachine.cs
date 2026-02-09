@@ -3,10 +3,10 @@ using System;
 
 public partial class StateMachine : Node
 {
-    [Export] public MovementState3D startingState;
+    [Export] public State startingState;
 
     private IMover _mover;
-    private MovementState3D _currentState;
+    private State _currentState;
 
     public void Init(CharacterBody3D agent, AnimationPlayer animator)
     {
@@ -22,12 +22,12 @@ public partial class StateMachine : Node
         startingState.Enter(null);
     }
 
-    public void ChangeState(MovementState3D newState)
+    public void ChangeState(State newState)
     {
         if (_currentState is not null)
             _currentState.Exit(newState);
 
-        MovementState3D temp = newState;
+        State temp = newState;
         while (temp != null)
         {
             GD.Print($"New state: {temp.Name}");
@@ -39,7 +39,7 @@ public partial class StateMachine : Node
 
     public void ProcessFrame(double delta)
     {
-        MovementState3D newState = _currentState.ProcessFrame(delta);
+        State newState = _currentState.ProcessFrame(delta);
 
         if (newState is not null)
             this.ChangeState(newState);
@@ -47,7 +47,7 @@ public partial class StateMachine : Node
 
     public void ProcessInput(InputEvent e)
     {
-        MovementState3D newState = _currentState.ProcessInput(e);
+        State newState = _currentState.ProcessInput(e);
 
         if (newState is not null)
             this.ChangeState(newState);
@@ -55,7 +55,7 @@ public partial class StateMachine : Node
 
     public void ProcessPhysics(double delta)
     {
-        MovementState3D newState = _currentState.ProcessPhysics(delta);
+        State newState = _currentState.ProcessPhysics(delta);
 
         if (newState is not null)
             this.ChangeState(newState);
