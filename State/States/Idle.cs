@@ -3,15 +3,28 @@ using System;
 
 public partial class Idle : GroundedState3D
 {
-    [Export] public Walking walkState;
+    [Export] public GroundedState3D walkState;
+    [Export] public GroundedState3D runState;
+
+    protected override MovementState3D GetGroundedState()
+    {
+        if (this.GetInputDirection() != Vector3.Zero)
+            return _agent.Velocity.Length() > GroundedState3D.RunSpeed
+                ? runState
+                : walkState;
+
+        return null;
+    }
 
     public override MovementState3D ProcessPhysics(double delta)
     {
-        if (this.GetAerialState(delta) is MovementState3D aerialState)
+        if (this.GetAerialState() is MovementState3D aerialState)
             return aerialState;
 
-        Vector2 inputDir = this.GetInputDirection();
-        if (inputDir != Vector2.Zero)
+        if (this.GetGroundedState() is MovementState3D groundedState)
+            return groundedState;
+
+        if (GetGroundedState() is MovementState3D)
             return this.walkState;
 
         _agent.Velocity = Vector3.Zero;

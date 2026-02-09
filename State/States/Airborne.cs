@@ -52,7 +52,7 @@ public partial class Airborne : MovementState3D
         _agent.Velocity += _agent.GetGravity() * fdelta;
 
         if (_agent.IsOnFloor())
-            return this.GetInputDirection() == Vector2.Zero ? idleState : walkState;
+            return walkState;
 
         if (_coyoteTimer < this.coyoteTime)
         {

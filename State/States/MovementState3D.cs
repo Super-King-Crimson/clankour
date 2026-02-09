@@ -33,6 +33,6 @@ public abstract partial class MovementState3D : State
         return null;
     }
 
-    public virtual Vector2 GetInputDirection() => _mover.GetInputDirection();
+    public virtual Vector3 GetInputDirection() => _mover.GetInputDirection();
     public virtual bool WantsJump() => _mover.WantsJump();
 }

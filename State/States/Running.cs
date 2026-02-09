@@ -3,60 +3,61 @@ using System;
 
 public partial class Running : GroundedState3D
 {
+    public override float AnimSpeedBase { get; set; } = 0.5f;
+    public override float AnimSpeedScale { get; set; } = 1.0f;
+
     [Export] public GroundedState3D walkState;
-    [Export] public MovementState3D idleState;
+    [Export] public GroundedState3D idleState;
+    [Export] public GroundedState3D slidingState;
 
-    [Export] public override float Acceleration { get; set; } = 10.0f;
-    [Export] public float minimumSlideDotProd = -0.2f;
-    [Export] public float friction = 50.0f;
+    [Export] public override float Acceleration { get; set; } = 7.0f;
 
-    public override MovementState3D Enter(State _)
+    protected override MovementState3D GetGroundedState()
     {
-        var speed = _agent.Velocity.Length();
+        var direction = this.GetInputDirection();
 
-        if (speed < _runSpeed)
+        Vector3 velocity = _agent.Velocity;
+
+        if (velocity.Normalized().Dot(direction) < GroundedState3D.MinimumSlideDotProd)
+            return slidingState;
+
+        if (velocity.Length() < this.MinSpeed)
             return walkState;
 
-        return base.Enter(_);
+        return null;
     }
 
     public override MovementState3D ProcessPhysics(double delta)
     {
         base.ProcessPhysics(delta);
 
-        if (this.GetAerialState(delta) is MovementState3D aerialState)
+        if (this.GetAerialState() is MovementState3D aerialState)
         {
-            GD.Print($"I am moving at {_agent.Velocity}");
-            GD.Print($"I am located at {_agent.Position}");
             return aerialState;
-
         }
-        Vector2 inputDir = this.GetInputDirection();
+
+        if (this.GetGroundedState() is MovementState3D groundedState)
+        {
+            return groundedState;
+        }
+
+        Vector3 direction = this.GetInputDirection();
         Vector3 prevVel = _agent.Velocity;
         var speed = prevVel.Length();
         float newSpeed;
         float deltaV;
 
-        if (inputDir == Vector2.Zero)
+        if (direction == Vector3.Zero)
         {
-            if (speed != 0)
-            {
-                deltaV = friction * (float)delta;
-                newSpeed = Math.Max(0, speed - deltaV);
-                _agent.Velocity = prevVel.Normalized() * newSpeed;
+            deltaV = Friction * (float)delta;
+            newSpeed = Math.Max(0, speed - deltaV);
+            _agent.Velocity = prevVel.Normalized() * newSpeed;
 
-                if (speed != 0)
-                    return null;
-            }
+            if (speed != 0)
+                return null;
 
             return idleState;
         }
-
-        Vector3 direction = _agent.Transform.Basis * new Vector3(inputDir.X, 0, inputDir.Y);
-
-        // TODO: Change to slide state
-        if (speed != 0 && prevVel.Normalized().Dot(direction) < minimumSlideDotProd)
-            return idleState;
 
         deltaV = Acceleration * (float)delta;
         newSpeed = Math.Min(MaxSpeed, speed + deltaV);
@@ -65,6 +66,8 @@ public partial class Running : GroundedState3D
         var newVel = prevVel.Normalized() * newSpeed;
         var goalVel = direction * newSpeed;
         _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed);
+
+        _animator.SpeedScale = this.GetAnimationSpeed(newSpeed);
 
         if (Character is not null)
             Character.LookAt(_agent.Position + _agent.Velocity);

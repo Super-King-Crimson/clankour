@@ -3,10 +3,15 @@ using System;
 
 public partial class PlayerMover : Node, IMover
 {
-    private CameraMount _cameraMount;
+    [Export] public CharacterBody3D player;
 
-    public void Init(CameraMount cameraMount) => _cameraMount = cameraMount;
+    public Vector3 GetInputDirection()
+    {
+        Vector2 input = Input.GetVector("left", "right", "fore", "back");
+        Vector3 input3D = new(input.X, 0, input.Y);
 
-    public Vector2 GetInputDirection() => Input.GetVector("left", "right", "fore", "back");
+        return player.Transform.Basis * input3D;
+    }
+
     public bool WantsJump() => Input.IsActionJustPressed("jump");
 }
