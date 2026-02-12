@@ -1,80 +1,86 @@
 using Godot;
 using System;
 
-public partial class Running : GroundedState3D
+public partial class Running : MovementState3D
 {
-    public override float AnimSpeedBase { get; set; } = 0.5f;
-    public override float AnimSpeedScale { get; set; } = 1.0f;
+    [Export] public override float Acceleration { get; set; } = 7;
+    [Export] public override float RotationSpeed { get; set; } = 20;
 
-    [Export] public GroundedState3D walkState;
-    [Export] public GroundedState3D idleState;
-    [Export] public GroundedState3D slidingState;
+    [Export] public override float MinSpeed { get; set; } = 10;
+    [Export] public override float MaxSpeed { get; set; } = 30;
 
-    [Export] public override float Acceleration { get; set; } = 7.0f;
+    [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
+    [Export] public override float AnimSpeedScale { get; set; } = 1;
 
-    protected override MovementState3D GetGroundedState()
+    [Export] private MovementState3D _airborneState;
+    [Export] private MovementState3D _idleState;
+    [Export] private MovementState3D _jumpState;
+    [Export] private Sliding _slidingState;
+    [Export] private MovementState3D _walkState;
+
+    protected override MovementState3D GetNextGroundedState()
     {
-        var direction = this.GetInputDirection();
-
-        Vector3 velocity = _agent.Velocity;
-
-        if (velocity.Normalized().Dot(direction) < GroundedState3D.MinimumSlideDotProd)
-            return slidingState;
-
-        if (velocity.Length() < this.MinSpeed)
-            return walkState;
-
-        return null;
-    }
-
-    public override MovementState3D ProcessPhysics(double delta)
-    {
-        base.ProcessPhysics(delta);
-
-        if (this.GetAerialState() is MovementState3D aerialState)
-        {
-            return aerialState;
-        }
-
-        if (this.GetGroundedState() is MovementState3D groundedState)
-        {
-            return groundedState;
-        }
-
         Vector3 direction = this.GetInputDirection();
-        Vector3 prevVel = _agent.Velocity;
-        var speed = prevVel.Length();
-        float newSpeed;
-        float deltaV;
 
         if (direction == Vector3.Zero)
-        {
-            deltaV = Friction * (float)delta;
-            newSpeed = Math.Max(0, speed - deltaV);
-            _agent.Velocity = prevVel.Normalized() * newSpeed;
+            return _idleState;
 
-            if (speed != 0)
-                return null;
+        if (_agent.Velocity.Normalized().Dot(direction) <= _slidingState.minimumSlideDotProd)
+            return _slidingState;
 
-            return idleState;
-        }
-
-        float fdelta = (float)delta;
-        deltaV = Acceleration * fdelta;
-        newSpeed = Math.Min(MaxSpeed, speed + deltaV);
-
-        newSpeed = Math.Min(speed + deltaV, MaxSpeed);
-        var newVel = prevVel.Normalized() * newSpeed;
-        var goalVel = direction * newSpeed;
-        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed * fdelta);
-
-        _animator.SpeedScale = this.GetAnimationSpeed(newSpeed);
-
-        if (Character is not null)
-            Character.LookAt(_agent.Position + _agent.Velocity);
+        if (Speed < MinSpeed)
+            return _walkState;
 
         return null;
     }
+
+    protected override MovementState3D GetNextAerialState()
+    {
+        if (this.WantsJump())
+            return _jumpState;
+
+        if (!_agent.IsOnFloor())
+            return _airborneState;
+
+        return null;
+    }
+
+    public override State Enter(State prevState)
+    {
+        Speed = _agent.Velocity.Length();
+
+        if (this.GetNextState() is State s) return s;
+
+        return base.Enter(prevState);
+    }
+
+    public override float GetAnimationSpeed() => AnimSpeedBase + (AnimSpeedScale * (Speed / MaxSpeed));
+
+    public override State ProcessPhysics(double delta)
+    {
+        if (this.GetNextState() is State s) return s;
+
+        Vector3 direction = this.GetInputDirection();
+
+        Vector3 prevVel = _agent.Velocity;
+
+        float fdelta = (float)delta;
+        float deltaV = Acceleration * fdelta;
+
+        float agentSpeed = _agent.Velocity.Length();
+        Speed = Math.Min(MaxSpeed, agentSpeed + deltaV);
+
+        var newVel = prevVel.Normalized() * Speed;
+        var goalVel = direction * Speed;
+        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed * fdelta);
+
+        _animator.SpeedScale = this.GetAnimationSpeed();
+
+        if (_character is not null)
+            _character.LookAt(_agent.Position + _agent.Velocity);
+
+        return base.ProcessPhysics(delta);
+    }
+
+    public Running() : base("running") { }
 }
-
-

@@ -28,6 +28,7 @@ public partial class Player : CharacterBody3D
         _stateMachine = GetNode<StateMachine>("StateMachine");
         _mover = GetNode<PlayerMover>("StateMachine/Mover");
 
+        _stateMachine.SetCharacter(GetNode<Node3D>("Character"));
         _stateMachine.Init(this, _animator);
     }
 }

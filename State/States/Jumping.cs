@@ -3,25 +3,28 @@ using System;
 
 public partial class Jumping : MovementState3D
 {
-    [Export] public MovementState3D airborneState;
+    [Export] private MovementState3D _airborneState;
 
-    [Export] public int MidairJumps { get; set; } = 1;
-    [Export] public float JumpVelocity { get; set; } = 4.5f;
+    [Export] public int midairJumps = 0;
+    [Export] public float jumpVelocity = 4.5f;
 
-    public float cartwheelBoost = 3.0f;
+    private string _defaultAnimationName = "";
+    [Export] public string cartwheelAnimationName;
 
     private bool _doingCartwheel = false;
+    private bool _jumped = false;
+
+    [Export] public float cartwheelJumpVelocity = 10.0f;
 
     public override State Enter(State prevState)
     {
-        if (prevState == airborneState)
-            if (MidairJumps <= 0)
-                return prevState;
+        _jumped = false;
 
         if (prevState is Sliding)
         {
             _doingCartwheel = true;
-            JumpVelocity += this.cartwheelBoost;
+            _defaultAnimationName = this.animationName;
+            this.animationName = this.cartwheelAnimationName;
         }
 
         return base.Enter(prevState);
@@ -31,21 +34,29 @@ public partial class Jumping : MovementState3D
     {
         if (_doingCartwheel)
         {
+            this.animationName = _defaultAnimationName;
             _doingCartwheel = false;
-            JumpVelocity -= this.cartwheelBoost;
         }
 
         return null;
     }
 
-    public override MovementState3D ProcessPhysics(double delta)
+    public override State ProcessPhysics(double delta)
     {
+        if (_jumped) return _airborneState;
+
+        _jumped = true;
+
         var newVel = _agent.Velocity;
-        newVel.Y = JumpVelocity;
+
+        float yVelocity = _doingCartwheel ? this.cartwheelJumpVelocity : this.jumpVelocity;
+
+        newVel.Y = yVelocity;
 
         _agent.Velocity = newVel;
-        base.ProcessPhysics(delta);
 
-        return airborneState;
+        return base.ProcessPhysics(delta);
     }
+
+    public Jumping() : base("jumping") { }
 }

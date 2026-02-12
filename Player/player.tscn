@@ -3949,58 +3949,50 @@ playback_default_blend_time = 0.2
 [node name="StateMachine" parent="." node_paths=PackedStringArray("startingState") instance=ExtResource("2_hqtel")]
 startingState = NodePath("Idle")
 
-[node name="Mover" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
+[node name="Mover" type="Node" parent="StateMachine"]
 script = ExtResource("3_1jxqw")
-player = NodePath("../..")
 
-[node name="Jumping" type="Node" parent="StateMachine" node_paths=PackedStringArray("airborneState")]
+[node name="Jumping" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState")]
 script = ExtResource("3_sweqy")
-airborneState = NodePath("../Airborne")
+_airborneState = NodePath("../Airborne")
+cartwheelAnimationName = "none"
 animationName = "kick"
 
-[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "runState", "airborneState", "jumpState", "Character")]
+[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_jumpState", "_walkState")]
 script = ExtResource("4_1jxqw")
-walkState = NodePath("../Walking")
-runState = NodePath("../Running")
-airborneState = NodePath("../Airborne")
-jumpState = NodePath("../Jumping")
-Character = NodePath("../../Character")
+_airborneState = NodePath("../Airborne")
+_jumpState = NodePath("../Jumping")
+_walkState = NodePath("../Walking")
 animationName = "idle"
 
-[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("runState", "idleState", "airborneState", "jumpState", "Character")]
+[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_runState")]
 script = ExtResource("4_2hs0m")
-runState = NodePath("../Running")
-idleState = NodePath("../Idle")
-airborneState = NodePath("../Airborne")
-jumpState = NodePath("../Jumping")
-Acceleration = 5.0
-Character = NodePath("../../Character")
+_airborneState = NodePath("../Airborne")
+_idleState = NodePath("../Idle")
+_jumpState = NodePath("../Jumping")
+_runState = NodePath("../Running")
 animationName = "walking"
 
-[node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "jumpState", "Character")]
+[node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("_walkState", "_jumpState")]
 script = ExtResource("5_sweqy")
-walkState = NodePath("../Walking")
-idleState = NodePath("../Idle")
-jumpState = NodePath("../Jumping")
-Character = NodePath("../../Character")
+_walkState = NodePath("../Walking")
+_jumpState = NodePath("../Jumping")
 animationName = "idle"
 
-[node name="Running" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "idleState", "slidingState", "airborneState", "jumpState", "Character")]
+[node name="Running" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_slidingState", "_walkState")]
 script = ExtResource("9_b26j0")
-walkState = NodePath("../Walking")
-idleState = NodePath("../Idle")
-slidingState = NodePath("../Sliding")
-airborneState = NodePath("../Airborne")
-jumpState = NodePath("../Jumping")
-Character = NodePath("../../Character")
+_airborneState = NodePath("../Airborne")
+_idleState = NodePath("../Idle")
+_jumpState = NodePath("../Jumping")
+_slidingState = NodePath("../Sliding")
+_walkState = NodePath("../Walking")
 animationName = "knock_down"
 
-[node name="Sliding" type="Node" parent="StateMachine" node_paths=PackedStringArray("walkState", "runState", "idleState", "airborneState", "jumpState", "Character")]
+[node name="Sliding" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_runState", "_walkState")]
 script = ExtResource("10_x3vf3")
-walkState = NodePath("../Walking")
-runState = NodePath("../Running")
-idleState = NodePath("../Idle")
-airborneState = NodePath("../Airborne")
-jumpState = NodePath("../Jumping")
-Character = NodePath("../../Character")
+_airborneState = NodePath("../Airborne")
+_idleState = NodePath("../Idle")
+_jumpState = NodePath("../Jumping")
+_runState = NodePath("../Running")
+_walkState = NodePath("../Walking")
 animationName = "kick"

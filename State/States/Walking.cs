@@ -1,61 +1,116 @@
 using Godot;
 using System;
 
-public partial class Walking : GroundedState3D
+public partial class Walking : MovementState3D
 {
-    public override float RotationSpeed { get; set; } = 10.0f;
+    [Export] public override float Acceleration { get; set; } = 1;
+    [Export] public override float MinSpeed { get; set; } = 3;
+    [Export] public override float RotationSpeed { get; set; } = 900;
 
-    public override float AnimSpeedBase { get; set; } = 0.5f;
-    public override float AnimSpeedScale { get; set; } = 0.5f;
+    [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
+    [Export] public override float AnimSpeedScale { get; set; } = 0.5f;
 
-    [Export] public GroundedState3D runState;
-    [Export] public GroundedState3D idleState;
+    [Export] public float MaxSpeedNoDot { get; set; } = 5;
+    [Export] public float MinAccelerationDot { get; set; } = 0.5f;
 
-    protected override MovementState3D GetGroundedState()
+    [Export] private MovementState3D _airborneState;
+    [Export] private MovementState3D _idleState;
+    [Export] private MovementState3D _jumpState;
+    [Export] private MovementState3D _runState;
+
+    protected override MovementState3D GetNextGroundedState()
     {
-        if (_agent.Velocity.Length() > GroundedState3D.RunSpeed)
-            return this.runState;
+        if (this.GetInputDirection() == Vector3.Zero)
+            return _idleState;
+
+        if (Speed > _runState.MinSpeed)
+            return _runState;
 
         return null;
     }
 
-    public override MovementState3D ProcessPhysics(double delta)
+    protected override MovementState3D GetNextAerialState()
     {
-        base.ProcessPhysics(delta);
+        if (!_agent.IsOnFloor())
+            return _airborneState;
 
-        if (this.GetAerialState() is MovementState3D aerialState)
+        if (this.WantsJump())
+            return _jumpState;
+
+        return null;
+    }
+
+    public override State Enter(State prevState)
+    {
+        Speed = _agent.Velocity.Length();
+
+        if (this.GetNextState() is State s) return s;
+
+        return base.Enter(prevState);
+    }
+
+    public override float GetAnimationSpeed() => AnimSpeedBase + (AnimSpeedScale * (Speed / _runState.MinSpeed));
+
+    public override State ProcessPhysics(double delta)
+    {
+        if (this.GetNextState() is State s) return s;
+
+        Vector3 directionNorm = this.GetInputDirection().Normalized();
+        Vector3 prevVel = _agent.Velocity;
+
+        Speed = _agent.Velocity.Length();
+
+        if (Speed < MinSpeed)
         {
-            return aerialState;
+            if (Speed == 0)
+            {
+                prevVel = directionNorm;
+            }
+
+            Speed = MinSpeed;
         }
 
-        if (this.GetGroundedState() is MovementState3D groundedState)
-        {
-            return groundedState;
-        }
+        Vector3 prevVelNorm = prevVel.Normalized();
 
-        Vector3 direction = this.GetInputDirection();
-        if (direction == Vector3.Zero)
-        {
-            _agent.Velocity = Vector3.Zero;
-            return idleState;
-        }
-
+        float newSpeed = Speed;
         float fdelta = (float)delta;
 
-        var prevVel = _agent.Velocity;
-        var speed = prevVel.Length();
-        var deltaV = Acceleration * fdelta;
+        if (prevVelNorm.Dot(directionNorm) >= MinAccelerationDot || Speed < MaxSpeedNoDot)
+        {
+            newSpeed += fdelta * Acceleration;
+        }
+        else if (Speed >= MaxSpeedNoDot)
+        {
+            newSpeed = MaxSpeedNoDot;
+        }
 
-        var newSpeed = Math.Min(speed + deltaV, MaxSpeed);
-        var newVel = prevVel.Normalized() * newSpeed;
-        var goalVel = direction * newSpeed;
-        _agent.Velocity = newVel.Slerp(goalVel, RotationSpeed * fdelta);
+        float deltaDeg = RotationSpeed * fdelta;
+        float degBetween = Mathf.RadToDeg(prevVelNorm.AngleTo(directionNorm));
 
-        if (Character is not null)
-            Character.LookAt(_agent.Position + _agent.Velocity);
+        Vector3 goalVel = directionNorm;
 
-        _animator.SpeedScale = this.GetAnimationSpeed(newSpeed);
+        if (degBetween > deltaDeg)
+        {
+            if (Mathf.Abs(degBetween - 180) <= 1)
+            {
+                // HACK: offset by one degree so we can offset slightly
+                // to set up a proper rotation
+                prevVelNorm = prevVelNorm.Rotated(_agent.Transform.Basis.Y, Mathf.DegToRad(1));
+            }
 
-        return null;
+            goalVel = prevVelNorm.Slerp(directionNorm, deltaDeg / degBetween);
+        }
+
+        _agent.Velocity = goalVel * newSpeed;
+
+        if (_character is not null)
+            _character.LookAt(_agent.Position + _agent.Velocity);
+
+        _animator.SpeedScale = this.GetAnimationSpeed();
+
+        return base.ProcessPhysics(delta);
     }
+
+    public Walking() : base("walking") { }
 }
+

@@ -5,8 +5,9 @@ public partial class StateMachine : Node
 {
     [Export] public State startingState;
 
-    private IMover _mover;
+    private Node3D _character;
     private State _currentState;
+    private IMover _mover;
 
     public void Init(CharacterBody3D agent, AnimationPlayer animator)
     {
@@ -14,51 +15,91 @@ public partial class StateMachine : Node
         {
             if (child is MovementState3D state)
             {
+                GD.Print(state.id);
                 state.Init(agent, animator, _mover);
+
+                if (_character is not null)
+                {
+                    state.SetCharacter(_character);
+                }
             }
         }
 
-        _currentState = startingState;
-        startingState.Enter(null);
+        this.ChangeState(this.startingState);
     }
 
-    public void ChangeState(State newState)
+    public void SetCharacter(Node3D character)
     {
-        if (_currentState is not null)
-            _currentState.Exit(newState);
+        _character = character;
+    }
 
-        State temp = newState;
-        while (temp != null)
+    public void ChangeState(State state)
+    {
+        if (state is null)
         {
-            GD.Print($"New state: {temp.Name}");
-            temp = temp.Enter(_currentState);
+            throw new Exception("Cannot set state to null");
         }
 
-        _currentState = newState;
+        State newState = state;
+        while (newState != null)
+        {
+            if (_currentState is not null)
+                _currentState.Exit(state);
+
+            GD.Print($"Going from {_currentState?.id ?? "stateless"} to {newState.id}");
+            State prevState = _currentState;
+            _currentState = newState;
+
+            newState = _currentState.Enter(prevState);
+        }
     }
 
     public void ProcessFrame(double delta)
     {
-        State newState = _currentState.ProcessFrame(delta);
+        if (_currentState is null)
+        {
+            throw new Exception("Must initialize and set starting state of state machine");
+        }
 
-        if (newState is not null)
+        State newState = _currentState.ProcessFrame(delta);
+        while (newState != null)
+        {
             this.ChangeState(newState);
+
+            newState = _currentState.ProcessFrame(delta);
+        }
     }
 
     public void ProcessInput(InputEvent e)
     {
-        State newState = _currentState.ProcessInput(e);
+        if (_currentState is null)
+        {
+            throw new Exception("Must initialize and set starting state of state machine");
+        }
 
-        if (newState is not null)
+        State newState = _currentState.ProcessInput(e);
+        while (newState != null)
+        {
             this.ChangeState(newState);
+
+            newState = _currentState.ProcessInput(e);
+        }
     }
 
     public void ProcessPhysics(double delta)
     {
-        State newState = _currentState.ProcessPhysics(delta);
+        if (_currentState is null)
+        {
+            throw new Exception("Must initialize and set starting state of state machine");
+        }
 
-        if (newState is not null)
+        State newState = _currentState.ProcessPhysics(delta);
+        while (newState != null)
+        {
             this.ChangeState(newState);
+
+            newState = _currentState.ProcessPhysics(delta);
+        }
     }
 
     public override void _Ready()
