@@ -3,12 +3,12 @@ using System;
 
 public partial class Walking : MovementState3D
 {
-    [Export] public override float Acceleration { get; set; } = 1;
-    [Export] public override float MinSpeed { get; set; } = 3;
-    [Export] public override float RotationSpeed { get; set; } = 900;
+    [Export] public override float Acceleration { get; set; } = 5;
+    [Export] public override float MinSpeed { get; set; } = 1;
+    [Export] public override float RotationSpeed { get; set; } = 500;
 
     [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
-    [Export] public override float AnimSpeedScale { get; set; } = 0.5f;
+    [Export] public override float AnimSpeedScale { get; set; } = 2;
 
     [Export] public float MaxSpeedNoDot { get; set; } = 5;
     [Export] public float MinAccelerationDot { get; set; } = 0.5f;
@@ -49,7 +49,7 @@ public partial class Walking : MovementState3D
         return base.Enter(prevState);
     }
 
-    public override float GetAnimationSpeed() => AnimSpeedBase + (AnimSpeedScale * (Speed / _runState.MinSpeed));
+    public override float GetAnimationSpeed() => AnimSpeedBase + (AnimSpeedScale * ((Speed - MinSpeed) / _runState.MinSpeed));
 
     public override State ProcessPhysics(double delta)
     {
@@ -79,29 +79,12 @@ public partial class Walking : MovementState3D
         {
             newSpeed += fdelta * Acceleration;
         }
-        else if (Speed >= MaxSpeedNoDot)
+        else
         {
-            newSpeed = MaxSpeedNoDot;
+            newSpeed = Math.Min(MaxSpeedNoDot, Speed);
         }
 
-        float deltaDeg = RotationSpeed * fdelta;
-        float degBetween = Mathf.RadToDeg(prevVelNorm.AngleTo(directionNorm));
-
-        Vector3 goalVel = directionNorm;
-
-        if (degBetween > deltaDeg)
-        {
-            if (Mathf.Abs(degBetween - 180) <= 1)
-            {
-                // HACK: offset by one degree so we can offset slightly
-                // to set up a proper rotation
-                prevVelNorm = prevVelNorm.Rotated(_agent.Transform.Basis.Y, Mathf.DegToRad(1));
-            }
-
-            goalVel = prevVelNorm.Slerp(directionNorm, deltaDeg / degBetween);
-        }
-
-        _agent.Velocity = goalVel * newSpeed;
+        _agent.Velocity = this.RotateFromRotationSpeed(prevVelNorm, directionNorm, fdelta) * newSpeed;
 
         if (_character is not null)
             _character.LookAt(_agent.Position + _agent.Velocity);

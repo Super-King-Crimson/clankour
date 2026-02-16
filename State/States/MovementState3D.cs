@@ -32,6 +32,28 @@ public abstract partial class MovementState3D : State
         _character = character;
     }
 
+    public Vector3 RotateFromRotationSpeed(Vector3 fromVec, Vector3 toVec, float fdelta)
+    {
+        float deltaDeg = RotationSpeed * fdelta;
+        float degBetween = Mathf.RadToDeg(fromVec.AngleTo(toVec));
+
+        Vector3 goalVel = toVec;
+
+        if (degBetween > deltaDeg)
+        {
+            if (Mathf.Abs(degBetween - 180) <= 0.01)
+            {
+                // HACK: offset by fraction of a deg
+                // to set up a proper rotation
+                fromVec = fromVec.Rotated(_agent.Transform.Basis.Y, Mathf.DegToRad(0.01f));
+            }
+
+            goalVel = fromVec.Slerp(toVec, deltaDeg / degBetween);
+        }
+
+        return goalVel;
+    }
+
     protected virtual MovementState3D GetNextAerialState() => null;
     protected virtual MovementState3D GetNextGroundedState() => null;
 

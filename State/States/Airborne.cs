@@ -3,13 +3,14 @@ using System;
 
 public partial class Airborne : MovementState3D
 {
-    [Export] public override float Acceleration { get; set; } = 3.0f;
-    [Export] public override float Friction { get; set; } = 20.0f;
-    [Export] public override float MaxSpeed { get; set; } = 5.0f;
-    [Export] public override float RotationSpeed { get; set; } = 1.0f;
+    [Export] public override float Acceleration { get; set; } = 3;
+    [Export] public override float MaxSpeed { get; set; } = 20;
+    [Export] public override float RotationSpeed { get; set; } = 500;
 
     [Export] private MovementState3D _walkState;
     [Export] private MovementState3D _jumpState;
+
+    [Export] public float MinNoDecelerateDot { get; set; } = 0;
 
     private float _coyoteTimer = 0;
     [Export] public float coyoteTime = 0.25f;
@@ -41,14 +42,14 @@ public partial class Airborne : MovementState3D
 
     public override State Enter(State prevState)
     {
-        _coyoteTimer = 0;
+        // assume player doesn't have coyote time 
+        // until proven otherwise
+        _coyoteTimer = this.coyoteTime;
+
+        if (this.GetNextState() is State s) return s;
 
         if (prevState is Jumping)
         {
-            _coyoteTimer = this.coyoteTime;
-
-            if (this.GetNextState() is State s) return s;
-
             _connected = true;
             _animator.AnimationFinished += this.StartAnimationOnFinished;
 
@@ -56,7 +57,7 @@ public partial class Airborne : MovementState3D
         }
         else
         {
-            if (this.GetNextState() is State s) return s;
+            _coyoteTimer = 0;
 
             return base.Enter(prevState);
         }
@@ -86,20 +87,42 @@ public partial class Airborne : MovementState3D
         {
             var velocityXZ = new Vector2(_agent.Velocity.X, _agent.Velocity.Z);
             var directionXZ = new Vector2(directionNorm.X, directionNorm.Z);
-            Vector2 targetXZ = velocityXZ.Normalized().Slerp(directionXZ, RotationSpeed * fdelta);
-
             float deltaV = Acceleration * fdelta;
-            float accelerationAtt = velocityXZ.Length() + deltaV;
-            float newSpeed = Math.Min(MaxSpeed, accelerationAtt);
 
-            var newVel = new Vector3(targetXZ.X * newSpeed, _agent.Velocity.Y, targetXZ.Y * newSpeed);
+            var speed = velocityXZ.Length();
 
+            if (speed == 0)
+            {
+                velocityXZ = directionXZ;
+            }
+
+            Vector2 xzNorm = velocityXZ.Normalized();
+            Vector3 newVel;
+
+            if (velocityXZ.Dot(directionXZ) < MinNoDecelerateDot)
+            {
+                speed -= deltaV;
+
+                newVel = new Vector3(xzNorm.X * speed, 0, xzNorm.Y * speed);
+            }
+            else
+            {
+                speed = Math.Min(MaxSpeed, speed + deltaV);
+
+                newVel = speed * this.RotateFromRotationSpeed(
+                    new Vector3(xzNorm.X, 0, xzNorm.Y),
+                    directionNorm,
+                    fdelta
+                );
+            }
+
+            newVel.Y = _agent.Velocity.Y;
             _agent.Velocity = newVel;
 
             if (_character is not null)
             {
-                newVel.Y = 0;
-                _character.LookAt(_agent.Position + newVel);
+                GD.Print(directionNorm);
+                _character.LookAt(_agent.Position + directionNorm);
             }
         }
 
