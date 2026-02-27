@@ -1,15 +1,7 @@
-[gd_scene load_steps=24 format=4 uid="uid://du4mlr4w3dki2"]
+[gd_scene load_steps=16 format=4 uid="uid://du4mlr4w3dki2"]
 
 [ext_resource type="Script" uid="uid://dwww3skoriglu" path="res://Player/Player.cs" id="1_onrkg"]
 [ext_resource type="PackedScene" uid="uid://cb64spf0bllsp" path="res://Camera/camera_mount.tscn" id="1_sweqy"]
-[ext_resource type="PackedScene" uid="uid://b8ytklf0g1bep" path="res://State/state_machine.tscn" id="2_hqtel"]
-[ext_resource type="Script" uid="uid://b3iminashagn1" path="res://Player/PlayerMover.cs" id="3_1jxqw"]
-[ext_resource type="Script" uid="uid://b3dwyd81bqt32" path="res://State/States/Jumping.cs" id="3_sweqy"]
-[ext_resource type="Script" uid="uid://4pmops5g0fx0" path="res://State/States/Idle.cs" id="4_1jxqw"]
-[ext_resource type="Script" uid="uid://c6laimkagg7ni" path="res://State/States/Walking.cs" id="4_2hs0m"]
-[ext_resource type="Script" uid="uid://by4lintkeccdw" path="res://State/States/Airborne.cs" id="5_sweqy"]
-[ext_resource type="Script" uid="uid://c4ihk10pae0lm" path="res://State/States/Running.cs" id="9_b26j0"]
-[ext_resource type="Script" uid="uid://dk3tapunjr6vk" path="res://State/States/Sliding.cs" id="10_x3vf3"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_00tjw"]
 radius = 0.25976563
@@ -3945,54 +3937,3 @@ libraries = {
 &"": SubResource("AnimationLibrary_0pkl8")
 }
 playback_default_blend_time = 0.2
-
-[node name="StateMachine" parent="." node_paths=PackedStringArray("startingState") instance=ExtResource("2_hqtel")]
-startingState = NodePath("Idle")
-
-[node name="Mover" type="Node" parent="StateMachine"]
-script = ExtResource("3_1jxqw")
-
-[node name="Jumping" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState")]
-script = ExtResource("3_sweqy")
-_airborneState = NodePath("../Airborne")
-cartwheelAnimationName = "none"
-animationName = "kick"
-
-[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_jumpState", "_walkState")]
-script = ExtResource("4_1jxqw")
-_airborneState = NodePath("../Airborne")
-_jumpState = NodePath("../Jumping")
-_walkState = NodePath("../Walking")
-animationName = "idle"
-
-[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_runState")]
-script = ExtResource("4_2hs0m")
-_airborneState = NodePath("../Airborne")
-_idleState = NodePath("../Idle")
-_jumpState = NodePath("../Jumping")
-_runState = NodePath("../Running")
-animationName = "walking"
-
-[node name="Airborne" type="Node" parent="StateMachine" node_paths=PackedStringArray("_walkState", "_jumpState")]
-script = ExtResource("5_sweqy")
-_walkState = NodePath("../Walking")
-_jumpState = NodePath("../Jumping")
-animationName = "idle"
-
-[node name="Running" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_slidingState", "_walkState")]
-script = ExtResource("9_b26j0")
-_airborneState = NodePath("../Airborne")
-_idleState = NodePath("../Idle")
-_jumpState = NodePath("../Jumping")
-_slidingState = NodePath("../Sliding")
-_walkState = NodePath("../Walking")
-animationName = "knock_down"
-
-[node name="Sliding" type="Node" parent="StateMachine" node_paths=PackedStringArray("_airborneState", "_idleState", "_jumpState", "_runState", "_walkState")]
-script = ExtResource("10_x3vf3")
-_airborneState = NodePath("../Airborne")
-_idleState = NodePath("../Idle")
-_jumpState = NodePath("../Jumping")
-_runState = NodePath("../Running")
-_walkState = NodePath("../Walking")
-animationName = "kick"

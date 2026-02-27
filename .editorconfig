@@ -4,3 +4,28 @@ root = true
 charset = utf-8
 indent_style = space
 indent_size = 4
+
+[*.cs]
+# Unused private fields (Rule CA1823)
+dotnet_diagnostic.CA1823.severity = warning
+
+# Unused parameters (Rule CA1801 / IDE0060)
+dotnet_diagnostic.IDE0060.severity = warning
+
+# Unused private members (General IDE rule)
+dotnet_diagnostic.IDE0051.severity = warning
+
+# Default severity for analyzer diagnostics with category 'Style'
+dotnet_analyzer_diagnostic.category-Style.severity = none
+
+# CA1050: Declare types in namespaces
+dotnet_diagnostic.CA1050.severity = none
+
+# IDE0005: Using directive is unnecessary.
+dotnet_diagnostic.IDE0005.severity = none
+
+# IDE0370: Remove unnecessary suppression
+dotnet_diagnostic.IDE0370.severity = none
+
+# IDE0003: Remove qualification
+dotnet_diagnostic.IDE0003.severity = none
