@@ -3948,9 +3948,9 @@ libraries = {
 }
 playback_default_blend_time = 0.2
 
-[node name="State" parent="." node_paths=PackedStringArray("StartingState", "NoneState", "Agent", "Animator", "Mover", "Character") instance=ExtResource("3_btcbx")]
-StartingState = NodePath("Walkiing")
-NoneState = NodePath("None")
+[node name="State" parent="." node_paths=PackedStringArray("_startingState", "_noneState", "Agent", "Animator", "Mover", "Character") instance=ExtResource("3_btcbx")]
+_startingState = NodePath("Idle")
+_noneState = NodePath("None")
 Agent = NodePath("..")
 Animator = NodePath("../Character/Model/Animator")
 Mover = NodePath("Mover")

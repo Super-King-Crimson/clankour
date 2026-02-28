@@ -1,17 +1,17 @@
 using Godot;
 using System;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public partial class Running : StateMachineNode
+public partial class Running : SMNode
 {
-    [Export] public override string AnimationName { get; set; } = "enter anim name or die";
-    [Export] public float AnimSpeedBase { get; set; } = 0.5f;
-    [Export] public float AnimSpeedScale { get; set; } = 0.05f;
+    [Export] protected override string AnimationName { get; set; } = "enter anim name or die";
+    [Export] protected float AnimSpeedBase { get; set; } = 0.5f;
+    [Export] protected float AnimSpeedScale { get; set; } = 0.05f;
 
-    [Export] public float Acceleration { get; set; } = 7;
-    [Export] public float RotationSpeed { get; set; } = 10;
-    [Export] public float MaximumNoSlideDeg { get; set; } = 120;
-    [Export] public float MaxSpeed { get; set; } = 30;
+    [Export] protected float Acceleration { get; set; } = 7;
+    [Export] protected float RotationSpeed { get; set; } = 10;
+    [Export] protected float MaximumNoSlideDeg { get; set; } = 120;
+    [Export] protected float MaxSpeed { get; set; } = 30;
 
     public Running() : base(Id.Running) { }
 
@@ -20,48 +20,45 @@ public partial class Running : StateMachineNode
         return AnimSpeedBase + (getSpeedH() * AnimSpeedScale);
     }
 
-    public override void Enter(StateMachineNode prevState)
+    public override void Enter(SMNode prevState)
     {
+        fireEnter(prevState.id);
         playAnimation();
     }
 
-    public override void Exit(StateMachineNode nextState) { }
+    public override void Exit(SMNode nextState)
+    {
+        fireExit(nextState.id);
+    }
 
-    public override bool ExitIfInvalid()
+    public override Id? GetTransition()
     {
         var moveDirection = getMoveDirection();
 
         if (!getAgent().IsOnFloor())
         {
-            fireExit(Id.Airborne);
-            return true;
+            return Id.Airborne;
         }
-
-        if (wantsJump())
+        else if (wantsJump())
         {
-            fireExit(Id.Jumping);
-            return true;
+            return Id.Jumping;
         }
-
-        if (getSpeedH() < _details.RunSpeed)
+        else if (getSpeedH() < _details.RunSpeed)
         {
-            fireExit(Id.Walking);
-            return true;
+            return Id.Walking;
         }
-
-        if (moveDirection == Vector3.Zero)
+        else if (moveDirection == Vector3.Zero)
         {
-            fireExit(Id.Idle);
-            return true;
+            return Id.Idle;
         }
-
-        if (!LabTools.VectorsWithinAngle(getVelocityH().Normalized(), moveDirection.Normalized(), Mathf.DegToRad(MaximumNoSlideDeg)))
+        else if (!LabTools.VectorsWithinAngle(getVelocityH().Normalized(), moveDirection.Normalized(), Mathf.DegToRad(MaximumNoSlideDeg)))
         {
-            fireExit(Id.Sliding);
-            return true;
+            return Id.Sliding;
         }
-
-        return false;
+        else
+        {
+            return null;
+        }
     }
 
     public override void ProcessPhysics(double delta)

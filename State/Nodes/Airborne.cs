@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GDC = Godot.Collections;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public partial class Airborne : StateMachineNode
+public partial class Airborne : SMNode
 {
-    [Export] public float Acceleration { get; set; } = 3;
-    [Export] public float MaxSpeed { get; set; } = 20;
-    [Export] public float RotationSpeed { get; set; } = 5;
+    [Export] protected float Acceleration { get; set; } = 3;
+    [Export] protected float MaxSpeed { get; set; } = 20;
+    [Export] protected float RotationSpeed { get; set; } = 5;
 
-    [Export] public float MaxNoDecelerateDeg { get; set; } = 90;
-    [Export] public float CoyoteTime { get; set; } = 0.25f;
+    [Export] protected float MaxNoDecelerateDeg { get; set; } = 90;
+    [Export] protected float CoyoteTime { get; set; } = 0.25f;
 
-    [Export] public GDC.Array<StateMachineNodeId> CanCoyoteFromStates { get; set; } = new();
+    [Export] protected GDC.Array<SMNodeId> CanCoyoteFromStates { get; set; } = new();
 
     private float _coyoteTimer = 0;
     private bool _connected = false;
@@ -25,8 +25,10 @@ public partial class Airborne : StateMachineNode
 
     private bool canCoyote() => _coyoteTimer < CoyoteTime;
 
-    public override void Enter(StateMachineNode prevState)
+    public override void Enter(SMNode prevState)
     {
+        fireEnter(prevState.id);
+
         if (CanCoyoteFromStates.Contains(prevState.id))
         {
             _coyoteTimer = 0;
@@ -41,29 +43,29 @@ public partial class Airborne : StateMachineNode
         }
     }
 
-    public override void Exit(StateMachineNode nextState)
+    public override void Exit(SMNode nextState)
     {
+        fireExit(nextState.id);
         if (!_connected) return;
 
         _connected = false;
         getAnimator().AnimationFinished -= playOnAnimationFinished;
     }
 
-    public override bool ExitIfInvalid()
+    public override Id? GetTransition()
     {
         if (getAgent().IsOnFloor())
         {
-            fireExit(Id.Idle);
-            return true;
+            return Id.Idle;
         }
-
-        if (wantsJump() && canCoyote())
+        else if (wantsJump() && canCoyote())
         {
-            fireExit(Id.Jumping);
-            return true;
+            return Id.Jumping;
         }
-
-        return false;
+        else
+        {
+            return null;
+        }
     }
 
     public override void ProcessPhysics(double delta)

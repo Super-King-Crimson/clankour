@@ -1,9 +1,9 @@
 using Godot;
 using System;
-using static StateMachineNode;
+using static SMNode;
 using Godot.Collections;
 
-public partial class StateMachineDetails : Node
+public partial class Details : Node
 {
     [Export] public CharacterBody3D Agent { get; set; } = null!;
     [Export] public AnimationPlayer Animator { get; set; } = null!;

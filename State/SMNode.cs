@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public enum StateMachineNodeId
+public enum SMNodeId
 {
     None,
     Airborne,
@@ -13,43 +13,32 @@ public enum StateMachineNodeId
     Walking
 }
 
-public enum StateChangeResult
+public abstract partial class SMNode : Node
 {
-    Ok = 0,
-    UnknownState = 101,
-}
+    public readonly SMNodeId id;
+    protected Details _details = null!;
 
-public abstract partial class StateMachineNode : Node
-{
-    public readonly StateMachineNodeId id;
-    protected StateMachineDetails _details = null!;
+    [Signal] public delegate void StateEnteredEventHandler(SMNodeId newStateId);
+    [Signal] public delegate void StateEndedEventHandler(SMNodeId newStateId);
 
-    [Signal] public delegate void StateEnteredEventHandler(StateMachineNodeId newStateId);
-    [Signal] public delegate void StateEndedEventHandler(StateMachineNodeId newStateId);
+    [Export] protected virtual string AnimationName { get; set; } = "ENTER ANIMATION NAME";
 
-    [Export] public virtual string AnimationName { get; set; } = "ENTER ANIMATION NAME";
-
-    public StateMachineNode(StateMachineNodeId id = Id.None)
+    public SMNode(Id id)
     {
         this.id = id;
     }
 
-    public abstract void Enter(StateMachineNode prevState);
-    public abstract void Exit(StateMachineNode nextState);
-    public abstract bool ExitIfInvalid();
+    public abstract void Enter(SMNode prevState);
+    public abstract void Exit(SMNode nextState);
+    public abstract Id? GetTransition();
     public abstract void ProcessPhysics(double delta);
 
-    public virtual void Init(StateMachineDetails details)
-    {
-        _details = details;
-    }
-
-    protected virtual void fireEnter(StateMachineNodeId prevStateId)
+    protected virtual void fireEnter(SMNodeId prevStateId)
     {
         this.EmitSignal(SignalName.StateEntered, (int)prevStateId);
     }
 
-    protected void fireExit(StateMachineNodeId nextStateId)
+    protected void fireExit(SMNodeId nextStateId)
     {
         this.EmitSignal(SignalName.StateEnded, (int)nextStateId);
     }
@@ -126,4 +115,9 @@ public abstract partial class StateMachineNode : Node
 
     protected Vector3 getPosition() => _details.GetPosition();
     protected Transform3D getTransform() => _details.GetTransform();
+
+    public virtual void Init(Details details)
+    {
+        _details = details;
+    }
 }

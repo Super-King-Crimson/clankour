@@ -1,41 +1,42 @@
 using Godot;
 using System;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public partial class Idle : StateMachineNode
+public partial class Idle : SMNode
 {
-    [Export] public float Friction { get; set; } = 30;
+    [Export] protected float Friction { get; set; } = 30;
 
     public Idle() : base(Id.Idle) { }
 
-    public override void Enter(StateMachineNode prevState)
+    public override void Enter(SMNode prevState)
     {
+        fireEnter(prevState.id);
         playAnimation();
     }
 
-    public override void Exit(StateMachineNode nextState) { }
+    public override void Exit(SMNode nextState)
+    {
+        fireExit(nextState.id);
+    }
 
-    public override bool ExitIfInvalid()
+    public override Id? GetTransition()
     {
         if (getMoveDirection() != Vector3.Zero)
         {
-            fireExit(Id.Walking);
-            return true;
+            return Id.Walking;
         }
-
-        if (wantsJump())
+        else if (wantsJump())
         {
-            fireExit(Id.Jumping);
-            return true;
+            return Id.Jumping;
         }
-
-        if (!getAgent().IsOnFloor())
+        else if (!getAgent().IsOnFloor())
         {
-            fireExit(Id.Airborne);
-            return true;
+            return Id.Airborne;
         }
-
-        return false;
+        else
+        {
+            return null;
+        }
     }
 
     public override void ProcessPhysics(double delta)

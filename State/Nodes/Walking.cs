@@ -1,16 +1,16 @@
 using Godot;
 using System;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public partial class Walking : StateMachineNode
+public partial class Walking : SMNode
 {
-    [Export] public float Acceleration { get; set; } = 3;
-    [Export] public float MinSpeed { get; set; } = 2;
-    [Export] public float RotationSpeed { get; set; } = 20;
+    [Export] protected float Acceleration { get; set; } = 3;
+    [Export] protected float MinSpeed { get; set; } = 2;
+    [Export] protected float RotationSpeed { get; set; } = 20;
 
-    [Export] public override string AnimationName { get; set; } = null!;
-    [Export] public float AnimSpeedBase { get; set; } = 0.3f;
-    [Export] public float AnimSpeedScale { get; set; } = 1.3f;
+    [Export] protected override string AnimationName { get; set; } = null!;
+    [Export] protected float AnimSpeedBase { get; set; } = 0.3f;
+    [Export] protected float AnimSpeedScale { get; set; } = 1.3f;
 
     [Export] public float MaxAccelerationDeg { get; set; } = 10;
 
@@ -21,42 +21,41 @@ public partial class Walking : StateMachineNode
         return AnimSpeedBase + (AnimSpeedScale * (getSpeedH() / _details.RunSpeed));
     }
 
-    public override void Enter(StateMachineNode prevState)
+    public override void Enter(SMNode prevState)
     {
+        fireEnter(prevState.id);
         playAnimation();
     }
 
-    public override void Exit(StateMachineNode nextState) { }
+    public override void Exit(SMNode nextState)
+    {
+        fireExit(nextState.id);
+    }
 
-    public override bool ExitIfInvalid()
+    public override Id? GetTransition()
     {
         var agent = getAgent();
 
         if (wantsJump())
         {
-            fireExit(Id.Jumping);
-            return true;
+            return Id.Jumping;
         }
-
-        if (getMoveDirection() == Vector3.Zero)
+        else if (getMoveDirection() == Vector3.Zero)
         {
-            fireExit(Id.Idle);
-            return true;
+            return Id.Idle;
         }
-
-        if (getSpeedH() > _details.RunSpeed)
+        else if (getSpeedH() > _details.RunSpeed)
         {
-            fireExit(Id.Running);
-            return true;
+            return Id.Running;
         }
-
-        if (!agent.IsOnFloor())
+        else if (!agent.IsOnFloor())
         {
-            fireExit(Id.Airborne);
-            return true;
+            return Id.Airborne;
         }
-
-        return false;
+        else
+        {
+            return null;
+        }
     }
 
     public override void ProcessPhysics(double delta)

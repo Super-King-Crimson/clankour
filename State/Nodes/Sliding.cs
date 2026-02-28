@@ -1,57 +1,56 @@
 using Godot;
 using System;
-using Id = StateMachineNodeId;
+using Id = SMNodeId;
 
-public partial class Sliding : StateMachineNode
+public partial class Sliding : SMNode
 {
-    [Export] public float Friction { get; set; } = 50;
-    [Export] public float CartwheelSpeed { get; set; } = 10;
-    [Export] public float MinimumSlideContinueDeg { get; set; } = 120;
+    [Export] protected float Friction { get; set; } = 50;
+    [Export] protected float CartwheelSpeed { get; set; } = 10;
+    [Export] protected float MinimumSlideContinueDeg { get; set; } = 120;
 
     public Sliding() : base(Id.Sliding) { }
 
-    public override void Enter(StateMachineNode prevState)
+    public override void Enter(SMNode prevState)
     {
+        fireExit(prevState.id);
         playAnimation();
     }
 
-    public override void Exit(StateMachineNode nextState) { }
+    public override void Exit(SMNode nextState)
+    {
+        fireExit(nextState.id);
+    }
 
-    public override bool ExitIfInvalid()
+    public override Id? GetTransition()
     {
         var moveDir = getMoveDirection();
         var agent = getAgent();
 
         if (LabTools.VectorsWithinAngle(getVelocityH().Normalized(), moveDir.Normalized(), Mathf.DegToRad(MinimumSlideContinueDeg)))
         {
-            fireExit(Id.Running);
-            return true;
+            return Id.Running;
         }
-
-        if (wantsJump())
+        else if (wantsJump())
         {
             if (moveDir != Vector3.Zero)
             {
                 agent.Velocity = moveDir * CartwheelSpeed;
             }
 
-            fireExit(Id.Jumping);
-            return true;
+            return Id.Jumping;
         }
-
-        if (getSpeedH() == 0)
+        else if (getSpeedH() == 0)
         {
-            fireExit(Id.Idle);
-            return true;
+            return Id.Idle;
         }
-
-        if (!agent.IsOnFloor())
+        else if (!agent.IsOnFloor())
         {
-            fireExit(Id.Airborne);
-            return true;
+            return Id.Airborne;
         }
-
-        return false;
+        else
+        {
+            return null;
+        }
     }
 
     public override void ProcessPhysics(double delta)
