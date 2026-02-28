@@ -15,6 +15,9 @@ public static class LabTools
         // Dot(a, b) = cos(angleDeg)
         // cos is a decreasing function on [0, pi]
         // therefore if cos of angle(a, b) is greater, the angle is smaller
+        // GD.Print("norm: " + aNormalized.Dot(bNormalized));
+        // GD.Print("rad: " + Mathf.Cos(rad));
+        // GD.Print("so " + (aNormalized.Dot(bNormalized) >= Mathf.Cos(rad)));
         return aNormalized.Dot(bNormalized) >= Mathf.Cos(rad);
     }
 

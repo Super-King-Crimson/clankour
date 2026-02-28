@@ -1,21 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://dcpgp6asnpl8f"]
+[gd_scene load_steps=2 format=3 uid="uid://dcpgp6asnpl8f"]
 
 [ext_resource type="Script" uid="uid://btp6utc80cjc" path="res://State/State.cs" id="1_4bir3"]
-[ext_resource type="Script" uid="uid://cw2rsja8nfd7u" path="res://State/StateMachine.cs" id="2_pd11q"]
-[ext_resource type="Script" uid="uid://t6cwta68635q" path="res://State/Nodes/None.cs" id="3_pd11q"]
-[ext_resource type="Script" uid="uid://ea7uw21pbu7s" path="res://State/StateMachineDetails.cs" id="4_o22kp"]
 
-[node name="State" type="Node" node_paths=PackedStringArray("_stateMachine", "_noneState", "_details")]
+[node name="State" type="Node"]
 script = ExtResource("1_4bir3")
-_stateMachine = NodePath("StateMachine")
-_noneState = NodePath("StateMachine/NONE")
-_details = NodePath("StateDetails")
-
-[node name="StateMachine" type="Node" parent="."]
-script = ExtResource("2_pd11q")
-
-[node name="NONE" type="Node" parent="StateMachine"]
-script = ExtResource("3_pd11q")
-
-[node name="StateDetails" type="Node" parent="."]
-script = ExtResource("4_o22kp")

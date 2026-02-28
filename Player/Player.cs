@@ -7,6 +7,6 @@ public partial class Player : CharacterBody3D
 
     public override void _PhysicsProcess(double delta)
     {
-        _state.ProcessPhysics(delta);
+        _state.machine.ProcessPhysics(delta);
     }
 }

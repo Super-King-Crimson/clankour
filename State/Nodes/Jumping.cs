@@ -4,11 +4,11 @@ using Id = StateMachineNodeId;
 
 public partial class Jumping : StateMachineNode
 {
-    [Export] public int midairJumps = 0;
-    [Export] public float jumpVelocity = 4.5f;
+    [Export] public int MidairJumps { get; set; } = 0;
+    [Export] public float JumpVelocity { get; set; } = 4.5f;
 
-    [Export] protected string _cartwheelAnimationName = null!;
-    [Export] protected string _defaultAnimationName = null!;
+    [Export] protected string CartwheelAnimationName { get; set; } = "ENTER ANIMATION NAME";
+    [Export] protected string DefaultAnimationName { get; set; } = "BRO ENTER THE NAME";
 
     private bool _doingCartwheel = false;
     private bool _jumped = false;
@@ -24,12 +24,12 @@ public partial class Jumping : StateMachineNode
         if (prevState.id == Id.Sliding)
         {
             _doingCartwheel = true;
-            AnimationName = _cartwheelAnimationName;
+            AnimationName = CartwheelAnimationName;
         }
         else
         {
             _doingCartwheel = false;
-            AnimationName = _defaultAnimationName;
+            AnimationName = DefaultAnimationName;
         }
 
         playAnimation();
@@ -53,7 +53,7 @@ public partial class Jumping : StateMachineNode
         var agent = getAgent();
         var newVel = getVelocityH();
 
-        float yVelocity = _doingCartwheel ? this.cartwheelJumpVelocity : this.jumpVelocity;
+        float yVelocity = _doingCartwheel ? this.cartwheelJumpVelocity : this.JumpVelocity;
 
         newVel.Y = yVelocity;
         agent.Velocity = newVel;

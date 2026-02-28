@@ -2,18 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using GDC = Godot.Collections;
 using Id = StateMachineNodeId;
 
 public partial class Airborne : StateMachineNode
 {
     [Export] public float Acceleration { get; set; } = 3;
     [Export] public float MaxSpeed { get; set; } = 20;
-    [Export] public float RotationSpeed { get; set; } = 1.5f;
+    [Export] public float RotationSpeed { get; set; } = 5;
 
     [Export] public float MaxNoDecelerateDeg { get; set; } = 90;
     [Export] public float CoyoteTime { get; set; } = 0.25f;
 
-    protected List<StateMachineNodeId> _validCoyoteTimeStates = new();
+    [Export] public GDC.Array<StateMachineNodeId> CanCoyoteFromStates { get; set; } = new();
 
     private float _coyoteTimer = 0;
     private bool _connected = false;
@@ -26,17 +27,18 @@ public partial class Airborne : StateMachineNode
 
     public override void Enter(StateMachineNode prevState)
     {
-        if (!_validCoyoteTimeStates.Contains(prevState.id))
+        if (CanCoyoteFromStates.Contains(prevState.id))
+        {
+            _coyoteTimer = 0;
+            playAnimation();
+        }
+        else
         {
             _coyoteTimer = CoyoteTime;
             _connected = true;
 
             getAnimator().AnimationFinished += playOnAnimationFinished;
-            return;
         }
-
-        _coyoteTimer = 0;
-        playAnimation();
     }
 
     public override void Exit(StateMachineNode nextState)
@@ -99,7 +101,7 @@ public partial class Airborne : StateMachineNode
 
             if (getCharacter() is Node3D c)
             {
-                c.LookAt(agent.Position + directionNorm);
+                c.LookAt(agent.Position + rotate(-1 * c.GlobalTransform.Basis.Z, directionNorm, fdelta * RotationSpeed));
             }
         }
 

@@ -1,46 +1,30 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using static StateMachineNode;
 
-public partial class StateMachine : Node
+public interface StateMachine
 {
-    protected StateMachineNode _noneState = null!;
+    public StateMachineNode StartingState { get; protected set; }
+    public StateMachineNode CurrentState { get; protected set; }
+    public StateMachineNode NoneState { get; protected set; }
+    public Dictionary<StateMachineNodeId, StateMachineNode> Nodes { get; protected set; }
 
-    protected StateMachineNode _startingState = null!;
-    protected StateMachineNode _currentState = null!;
-    protected StateMachineDetails _details = null!;
-    protected Dictionary<StateMachineNodeId, StateMachineNode> _nodes = new();
-
-    public bool IsInitialized { get; protected set; } = false;
-
-    public void Init(StateMachineNode startingState, StateMachineDetails details, StateMachineNode noneState)
-    {
-        if (IsInitialized) GD.PrintErr("StateMachine initialized more than once, is this error?");
-
-        IsInitialized = true;
-
-        _noneState = noneState;
-
-        _startingState = startingState;
-        _details = details;
-        _currentState = _noneState;
-    }
+    protected StateMachineDetails getDetails();
 
     protected void changeState(StateMachineNode newState)
     {
-        if (_currentState != _noneState)
+        if (CurrentState != NoneState)
         {
-            _currentState.StateEnded -= ChangeState;
-            _currentState.Exit(newState);
+            CurrentState.StateEnded -= ChangeState;
+            CurrentState.Exit(newState);
         }
 
-        GD.Print($"{_currentState.id} -> {newState.id}");
-        newState.Enter(_currentState);
+        GD.Print($"{CurrentState.id} -> {newState.id}");
+        newState.Enter(CurrentState);
 
         newState.StateEnded += ChangeState;
 
-        _currentState = newState;
+        CurrentState = newState;
     }
 
     protected void getNextValidState(int retries = 5)
@@ -52,10 +36,10 @@ public partial class StateMachine : Node
         {
             if (i >= MAX_RETRIES)
             {
-                throw new Exception($"Cyclic state loop detected related to agent {_details.Agent.Name}'s state {_currentState.id}");
+                throw new Exception($"Cyclic state loop detected related to agent {getDetails().Agent.Name}'s state {CurrentState.id}");
             }
 
-            if (!_currentState.ExitIfInvalid())
+            if (!CurrentState.ExitIfInvalid())
             {
                 break;
             }
@@ -66,8 +50,8 @@ public partial class StateMachine : Node
 
     public void AddState(StateMachineNode s)
     {
-        s.Init(_details);
-        _nodes.Add(s.id, s);
+        s.Init(getDetails());
+        Nodes.Add(s.id, s);
     }
 
     public bool TryAddState(StateMachineNode s)
@@ -123,17 +107,17 @@ public partial class StateMachine : Node
 
     public bool TryRemoveState(StateMachineNode s)
     {
-        return _nodes.Remove(s.id);
+        return Nodes.Remove(s.id);
     }
 
     public Dictionary<StateMachineNodeId, StateMachineNode> GetStates()
     {
-        return _nodes;
+        return Nodes;
     }
 
     public void ClearStates()
     {
-        _nodes.Clear();
+        Nodes.Clear();
     }
 
     public void ChangeState(StateMachineNodeId id)
@@ -143,7 +127,7 @@ public partial class StateMachine : Node
 
     public StateChangeResult TryChangeState(StateMachineNodeId id)
     {
-        if (!_nodes.TryGetValue(id, out var node)) return StateChangeResult.UnknownState;
+        if (!Nodes.TryGetValue(id, out var node)) return StateChangeResult.UnknownState;
 
         changeState(node);
         return StateChangeResult.Ok;
@@ -152,6 +136,6 @@ public partial class StateMachine : Node
     public void ProcessPhysics(double delta)
     {
         getNextValidState();
-        _currentState.ProcessPhysics(delta);
+        CurrentState.ProcessPhysics(delta);
     }
 }

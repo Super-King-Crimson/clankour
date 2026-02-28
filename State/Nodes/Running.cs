@@ -4,11 +4,12 @@ using Id = StateMachineNodeId;
 
 public partial class Running : StateMachineNode
 {
-    [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
-    [Export] public float AnimSpeedScale { get; set; } = 0.1f;
+    [Export] public override string AnimationName { get; set; } = "enter anim name or die";
+    [Export] public float AnimSpeedBase { get; set; } = 0.5f;
+    [Export] public float AnimSpeedScale { get; set; } = 0.05f;
 
     [Export] public float Acceleration { get; set; } = 7;
-    [Export] public float RotationSpeed { get; set; } = 1;
+    [Export] public float RotationSpeed { get; set; } = 10;
     [Export] public float MaximumNoSlideDeg { get; set; } = 120;
     [Export] public float MaxSpeed { get; set; } = 30;
 
@@ -16,7 +17,7 @@ public partial class Running : StateMachineNode
 
     protected override float getAnimationSpeed()
     {
-        return AnimSpeedBase * getSpeedH() * AnimSpeedScale;
+        return AnimSpeedBase + (getSpeedH() * AnimSpeedScale);
     }
 
     public override void Enter(StateMachineNode prevState)

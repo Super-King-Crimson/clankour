@@ -27,8 +27,7 @@ public abstract partial class StateMachineNode : Node
     [Signal] public delegate void StateEnteredEventHandler(StateMachineNodeId newStateId);
     [Signal] public delegate void StateEndedEventHandler(StateMachineNodeId newStateId);
 
-    [Export] public virtual float AnimSpeedBase { get; set; } = 1;
-    [Export] public virtual string AnimationName { get; set; } = "";
+    [Export] public virtual string AnimationName { get; set; } = "ENTER ANIMATION NAME";
 
     public StateMachineNode(StateMachineNodeId id = Id.None)
     {
@@ -55,7 +54,7 @@ public abstract partial class StateMachineNode : Node
         this.EmitSignal(SignalName.StateEnded, (int)nextStateId);
     }
 
-    protected virtual float getAnimationSpeed() => AnimSpeedBase;
+    protected virtual float getAnimationSpeed() => 1;
     protected virtual void setAnimationSpeed() => getAnimator().SpeedScale = getAnimationSpeed();
 
     protected virtual void playAnimation()

@@ -6,12 +6,13 @@ public partial class Walking : StateMachineNode
 {
     [Export] public float Acceleration { get; set; } = 3;
     [Export] public float MinSpeed { get; set; } = 2;
-    [Export] public float RotationSpeed { get; set; } = 8;
+    [Export] public float RotationSpeed { get; set; } = 20;
 
-    [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
-    [Export] public float AnimSpeedScale { get; set; } = 1;
+    [Export] public override string AnimationName { get; set; } = null!;
+    [Export] public float AnimSpeedBase { get; set; } = 0.3f;
+    [Export] public float AnimSpeedScale { get; set; } = 1.3f;
 
-    [Export] public float MaxAccelerationDeg { get; set; } = 50;
+    [Export] public float MaxAccelerationDeg { get; set; } = 10;
 
     public Walking() : base(Id.Walking) { }
 
@@ -69,18 +70,18 @@ public partial class Walking : StateMachineNode
         float fdelta = (float)delta;
         float deltaV = fdelta * Acceleration;
 
-        if (LabTools.VectorsWithinAngle(prevVelNorm, directionNorm, MaxAccelerationDeg) && newSpeed > MinSpeed)
+        var newVelNorm = rotate(prevVelNorm, directionNorm, fdelta * RotationSpeed);
+
+        if (LabTools.VectorsWithinAngle(prevVelNorm, newVelNorm, Mathf.DegToRad(MaxAccelerationDeg)) && newSpeed >= MinSpeed)
         {
             newSpeed += deltaV;
         }
         else
         {
-            newSpeed = Math.Max(MinSpeed, newSpeed + deltaV);
+            newSpeed = Math.Min(MinSpeed, newSpeed + deltaV);
         }
 
-        var newVel = rotate(prevVelNorm, directionNorm, fdelta * RotationSpeed) * newSpeed;
-        newVel += getVelocityV();
-        agent.Velocity = newVel;
+        agent.Velocity = newVelNorm * newSpeed + getVelocityV();
 
         if (getCharacter() is Node3D n)
         {

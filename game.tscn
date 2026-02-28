@@ -62,10 +62,10 @@ use_collision = true
 size = Vector3(1024, 2, 1024)
 
 [node name="Slope" type="CSGPolygon3D" parent="Workspace"]
-transform = Transform3D(-5.4308233, 0, 19.248535, 0, 12, 0, -19.248535, 0, -5.4308233, 29.268032, 2.3841858e-07, -22.506348)
+transform = Transform3D(-13.577061, 0, 48.121338, 0, 50, 0, -48.121338, 0, -13.577061, 81.50818, 2.3841858e-07, -21.802704)
 material_override = SubResource("StandardMaterial3D_eow3j")
 use_collision = true
-polygon = PackedVector2Array(0, 0, 0, 1, 1, 0)
+polygon = PackedVector2Array(0, 0, 0, 0.8, 1, 0)
 mode = 1
 spin_degrees = 360.0
 spin_sides = 8
