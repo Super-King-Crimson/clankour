@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.IO;
 using Godot;
 
 public enum LogLevel
@@ -11,6 +13,7 @@ public enum LogLevel
 public static partial class LabTools
 {
     public static readonly LogLevel currLogLevel = LogLevel.Debug;
+    public static readonly string projectRoot = ProjectSettings.GlobalizePath("res://");
 
     public static void Log(string msg, LogLevel logLevel = LogLevel.Debug)
     {
@@ -21,7 +24,7 @@ public static partial class LabTools
 
         if (logLevel == LogLevel.Error)
         {
-            GD.PrintErr($"[ERROR]   {msg}");
+            GD.PushError($"[ERROR]   {msg}");
         }
         else if (logLevel == LogLevel.Standard)
         {
@@ -29,7 +32,13 @@ public static partial class LabTools
         }
         else
         {
-            GD.Print($"[{logLevel.ToString().ToUpper()}]    {msg}");
+            StackFrame sf = new StackFrame(1, true);
+            var fullPath = sf.GetFileName();
+            var file = Path.GetRelativePath(projectRoot, fullPath!);
+
+            var line = sf.GetFileLineNumber();
+
+            GD.Print($"[{logLevel.ToString().ToUpper()} ({file} line {line})]    {msg}    -    {Time.GetTimeStringFromSystem()}");
         }
     }
 }
