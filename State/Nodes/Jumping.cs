@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Id = StateMachineNodeId;
 
-public partial class Jumping : Movement3DNode
+public partial class Jumping : StateMachineNode
 {
     [Export] public int midairJumps = 0;
     [Export] public float jumpVelocity = 4.5f;
@@ -34,6 +34,8 @@ public partial class Jumping : Movement3DNode
 
         playAnimation();
     }
+
+    public override void Exit(StateMachineNode nextState) { }
 
     public override bool ExitIfInvalid()
     {

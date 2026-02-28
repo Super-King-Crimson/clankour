@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Id = StateMachineNodeId;
 
-public partial class Running : Movement3DNode
+public partial class Running : StateMachineNode
 {
     [Export] public override float AnimSpeedBase { get; set; } = 0.5f;
     [Export] public float AnimSpeedScale { get; set; } = 0.1f;
@@ -18,6 +18,13 @@ public partial class Running : Movement3DNode
     {
         return AnimSpeedBase * getSpeedH() * AnimSpeedScale;
     }
+
+    public override void Enter(StateMachineNode prevState)
+    {
+        playAnimation();
+    }
+
+    public override void Exit(StateMachineNode nextState) { }
 
     public override bool ExitIfInvalid()
     {

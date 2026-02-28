@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Id = StateMachineNodeId;
 
-public partial class Walking : Movement3DNode
+public partial class Walking : StateMachineNode
 {
     [Export] public float Acceleration { get; set; } = 3;
     [Export] public float MinSpeed { get; set; } = 2;
@@ -20,13 +20,20 @@ public partial class Walking : Movement3DNode
         return AnimSpeedBase + (AnimSpeedScale * (getSpeedH() / _details.RunSpeed));
     }
 
+    public override void Enter(StateMachineNode prevState)
+    {
+        playAnimation();
+    }
+
+    public override void Exit(StateMachineNode nextState) { }
+
     public override bool ExitIfInvalid()
     {
         var agent = getAgent();
 
         if (wantsJump())
         {
-            fireExit(Id.Idle);
+            fireExit(Id.Jumping);
             return true;
         }
 
@@ -75,9 +82,9 @@ public partial class Walking : Movement3DNode
         newVel += getVelocityV();
         agent.Velocity = newVel;
 
-        if (getCharacter() is CharacterBody3D c)
+        if (getCharacter() is Node3D n)
         {
-            c.LookAt(agent.Position + agent.Velocity);
+            n.LookAt(agent.Position + agent.Velocity);
         }
 
         setAnimationSpeed();

@@ -2,13 +2,20 @@ using Godot;
 using System;
 using Id = StateMachineNodeId;
 
-public partial class Sliding : Movement3DNode
+public partial class Sliding : StateMachineNode
 {
     [Export] public float Friction { get; set; } = 50;
     [Export] public float CartwheelSpeed { get; set; } = 10;
     [Export] public float MinimumSlideContinueDeg { get; set; } = 120;
 
     public Sliding() : base(Id.Sliding) { }
+
+    public override void Enter(StateMachineNode prevState)
+    {
+        playAnimation();
+    }
+
+    public override void Exit(StateMachineNode nextState) { }
 
     public override bool ExitIfInvalid()
     {

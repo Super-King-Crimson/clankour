@@ -2,11 +2,18 @@ using Godot;
 using System;
 using Id = StateMachineNodeId;
 
-public partial class Idle : Movement3DNode
+public partial class Idle : StateMachineNode
 {
     [Export] public float Friction { get; set; } = 30;
 
     public Idle() : base(Id.Idle) { }
+
+    public override void Enter(StateMachineNode prevState)
+    {
+        playAnimation();
+    }
+
+    public override void Exit(StateMachineNode nextState) { }
 
     public override bool ExitIfInvalid()
     {
@@ -29,11 +36,6 @@ public partial class Idle : Movement3DNode
         }
 
         return false;
-    }
-
-    public override void Enter(StateMachineNode prevState)
-    {
-        playAnimation();
     }
 
     public override void ProcessPhysics(double delta)

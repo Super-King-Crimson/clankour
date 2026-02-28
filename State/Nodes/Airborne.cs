@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 using Id = StateMachineNodeId;
 
-public partial class Airborne : Movement3DNode
+public partial class Airborne : StateMachineNode
 {
     [Export] public float Acceleration { get; set; } = 3;
     [Export] public float MaxSpeed { get; set; } = 20;
@@ -23,23 +23,6 @@ public partial class Airborne : Movement3DNode
     private void playOnAnimationFinished(StringName _) => playAnimation();
 
     private bool canCoyote() => _coyoteTimer < CoyoteTime;
-
-    public override bool ExitIfInvalid()
-    {
-        if (getAgent().IsOnFloor())
-        {
-            fireExit(Id.Idle);
-            return true;
-        }
-
-        if (wantsJump() && canCoyote())
-        {
-            fireExit(Id.Jumping);
-            return true;
-        }
-
-        return false;
-    }
 
     public override void Enter(StateMachineNode prevState)
     {
@@ -62,6 +45,23 @@ public partial class Airborne : Movement3DNode
 
         _connected = false;
         getAnimator().AnimationFinished -= playOnAnimationFinished;
+    }
+
+    public override bool ExitIfInvalid()
+    {
+        if (getAgent().IsOnFloor())
+        {
+            fireExit(Id.Idle);
+            return true;
+        }
+
+        if (wantsJump() && canCoyote())
+        {
+            fireExit(Id.Jumping);
+            return true;
+        }
+
+        return false;
     }
 
     public override void ProcessPhysics(double delta)

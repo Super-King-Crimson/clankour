@@ -5,27 +5,37 @@ using static StateMachineNode;
 
 public partial class StateMachine : Node
 {
-    public StateMachineNode StartingState { get; protected set; } = StateMachineNode.VOID;
+    protected StateMachineNode _noneState = null!;
 
+    protected StateMachineNode _startingState = null!;
+    protected StateMachineNode _currentState = null!;
+    protected StateMachineDetails _details = null!;
     protected Dictionary<StateMachineNodeId, StateMachineNode> _nodes = new();
-    protected StateDetails _details = null!;
 
-    protected StateMachineNode _currentState = VOID;
+    public bool IsInitialized { get; protected set; } = false;
 
-    public void Init(StateMachineNode startingState)
+    public void Init(StateMachineNode startingState, StateMachineDetails details, StateMachineNode noneState)
     {
-        StartingState = startingState;
-        changeState(StartingState);
+        if (IsInitialized) GD.PrintErr("StateMachine initialized more than once, is this error?");
+
+        IsInitialized = true;
+
+        _noneState = noneState;
+
+        _startingState = startingState;
+        _details = details;
+        _currentState = _noneState;
     }
 
     protected void changeState(StateMachineNode newState)
     {
-        if (_currentState != VOID)
+        if (_currentState != _noneState)
         {
             _currentState.StateEnded -= ChangeState;
+            _currentState.Exit(newState);
         }
 
-        _currentState.Exit(newState);
+        GD.Print($"{_currentState.id} -> {newState.id}");
         newState.Enter(_currentState);
 
         newState.StateEnded += ChangeState;
@@ -33,7 +43,7 @@ public partial class StateMachine : Node
         _currentState = newState;
     }
 
-    protected void getNextValidState(int retries = 3)
+    protected void getNextValidState(int retries = 5)
     {
         int i = 0;
         int MAX_RETRIES = retries;
@@ -56,15 +66,24 @@ public partial class StateMachine : Node
 
     public void AddState(StateMachineNode s)
     {
+        s.Init(_details);
         _nodes.Add(s.id, s);
     }
 
     public bool TryAddState(StateMachineNode s)
     {
-        return _nodes.TryAdd(s.id, s);
+        try
+        {
+            this.AddState(s);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
-    public void AddChildStates(Node parentNode, bool recursive = false)
+    public void AddChildStatesOfNode(Node parentNode, bool recursive = false)
     {
         if (parentNode.GetChildren().Count == 0) { return; }
 
@@ -72,20 +91,44 @@ public partial class StateMachine : Node
         {
             if (n is StateMachineNode s)
             {
-                TryAddState(s);
+                this.AddState(s);
             }
 
+            if (recursive)
+            {
+                AddChildStatesOfNode(n, true);
+            }
         }
 
-        if (recursive)
+    }
+
+    public void TryAddChildStatesOfNode(Node parentNode, bool recursive = false)
+    {
+        if (parentNode.GetChildren().Count == 0) { return; }
+
+        foreach (Node n in parentNode.GetChildren())
         {
-            AddChildStates(parentNode, true);
+            if (n is StateMachineNode s)
+            {
+                this.TryAddState(s);
+            }
+
+            if (recursive)
+            {
+                TryAddChildStatesOfNode(n, true);
+            }
         }
+
     }
 
     public bool TryRemoveState(StateMachineNode s)
     {
         return _nodes.Remove(s.id);
+    }
+
+    public Dictionary<StateMachineNodeId, StateMachineNode> GetStates()
+    {
+        return _nodes;
     }
 
     public void ClearStates()
@@ -102,27 +145,13 @@ public partial class StateMachine : Node
     {
         if (!_nodes.TryGetValue(id, out var node)) return StateChangeResult.UnknownState;
 
-        if (!_currentState.CanTransition(node)) return StateChangeResult.InvalidStateTransition;
-
         changeState(node);
         return StateChangeResult.Ok;
-    }
-
-    public void ProcessFrame(double delta)
-    {
-        getNextValidState();
-        _currentState.ProcessFrame(delta);
     }
 
     public void ProcessPhysics(double delta)
     {
         getNextValidState();
         _currentState.ProcessPhysics(delta);
-    }
-
-    public void ProcessInput(InputEvent e)
-    {
-        getNextValidState();
-        _currentState.ProcessInput(e);
     }
 }
